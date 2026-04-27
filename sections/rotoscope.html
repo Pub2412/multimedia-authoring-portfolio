@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rotoscope Project</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Gloria+Hallelujah&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --bg: #f4f7fb;
+            --ink: #1b2b3c;
+            --muted: #445769;
+            --accent: #2e587f;
+            --panel: rgba(255, 255, 255, 0.84);
+            --border: rgba(27, 43, 60, 0.4);
+            --shadow: 0 12px 24px rgba(16, 28, 42, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Montserrat", sans-serif;
+            color: var(--ink);
+            background: radial-gradient(900px 500px at 20% 15%, rgba(46, 88, 127, 0.16), transparent 62%), linear-gradient(155deg, #f9fbfe, var(--bg));
+            min-height: 100vh;
+        }
+
+        .wrap {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 28px 20px 48px;
+        }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .brand {
+            font-family: "Gloria Hallelujah", cursive;
+            font-size: clamp(1.5rem, 4vw, 2.2rem);
+        }
+
+        .back-link {
+            text-decoration: none;
+            color: var(--ink);
+            border: 1px solid var(--ink);
+            border-radius: 14px 6px 12px 8px;
+            padding: 9px 12px;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .hero {
+            background: var(--panel);
+            border: 2px solid var(--border);
+            border-radius: 20px 8px 16px 12px;
+            box-shadow: var(--shadow);
+            padding: 24px;
+        }
+
+        h1 {
+            font-family: "Gloria Hallelujah", cursive;
+            font-size: clamp(2rem, 5vw, 3.3rem);
+            margin-bottom: 12px;
+            line-height: 1.05;
+        }
+
+        .lead {
+            color: var(--muted);
+            max-width: 65ch;
+            line-height: 1.6;
+            margin-bottom: 18px;
+        }
+
+        .hero-video-wrap {
+            width: min(360px, 100%);
+            border: 2px solid var(--border);
+            border-radius: 18px 8px 16px 10px;
+            overflow: hidden;
+            background: rgba(241, 246, 252, 0.65);
+            box-shadow: var(--shadow);
+            margin: 0 0 18px;
+            transform: rotate(-0.5deg);
+        }
+
+        .hero-video-title {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: var(--ink);
+            font-family: "Gloria Hallelujah", cursive;
+        }
+
+        .hero-video {
+            display: block;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            object-fit: cover;
+            background: #111924;
+            height: auto;
+            filter: grayscale(1) contrast(1.1) brightness(0.95);
+        }
+
+        .hero-video-controls {
+            display: flex;
+            justify-content: flex-end;
+            padding: 10px;
+            background: rgba(235, 241, 248, 0.85);
+        }
+
+        .video-mute-btn {
+            border: 1px solid var(--ink);
+            background: rgba(241, 246, 252, 0.95);
+            color: var(--ink);
+            padding: 8px 12px;
+            border-radius: 12px 6px 10px 8px;
+            cursor: pointer;
+            font-family: "Montserrat", sans-serif;
+            font-weight: 700;
+            transition: 0.2s ease;
+        }
+
+        .video-mute-btn:hover {
+            background: #2d4460;
+            color: #eef4fc;
+            transform: rotate(-2deg);
+        }
+
+        .video-status {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-bottom: 12px;
+        }
+
+        .cards {
+            margin-top: 24px;
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 14px;
+        }
+
+        .card {
+            grid-column: span 6;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid var(--border);
+            border-radius: 16px 8px 12px 10px;
+            padding: 16px;
+        }
+
+        .card h2 {
+            font-size: 1.15rem;
+            margin-bottom: 8px;
+        }
+
+        .card p {
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .steps {
+            margin-top: 20px;
+            padding-left: 20px;
+        }
+
+        .steps li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        .progress-section {
+            margin-top: 24px;
+            padding: 18px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid var(--border);
+            border-radius: 16px 8px 12px 10px;
+        }
+
+        .progress-title {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+        }
+
+        .progress-note {
+            color: var(--muted);
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .progress-video-wrap {
+            width: min(560px, 100%);
+            border: 2px solid var(--border);
+            border-radius: 14px 6px 12px 8px;
+            overflow: hidden;
+            background: rgba(241, 246, 252, 0.65);
+        }
+
+        .progress-video {
+            display: block;
+            width: 100%;
+            height: auto;
+            background: #111924;
+        }
+
+        .progress-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(235, 241, 248, 0.9);
+            border-top: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+
+        .progress-btn {
+            border: 1px solid var(--ink);
+            background: rgba(241, 246, 252, 0.95);
+            color: var(--ink);
+            padding: 6px 10px;
+            border-radius: 10px 5px 8px 6px;
+            cursor: pointer;
+            font-family: "Montserrat", sans-serif;
+            font-weight: 700;
+            transition: 0.2s ease;
+        }
+
+        .progress-btn:hover {
+            background: #2d4460;
+            color: #eef4fc;
+        }
+
+        .progress-seek {
+            flex: 1;
+            min-width: 150px;
+            accent-color: #2d4460;
+        }
+
+        .progress-time {
+            font-size: 0.85rem;
+            color: var(--muted);
+            min-width: 78px;
+            text-align: right;
+        }
+
+        @media (max-width: 760px) {
+            .card {
+                grid-column: span 12;
+            }
+
+            .top {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <header class="top">
+            <div class="brand">Rotoscope Animation Project</div>
+            <a class="back-link" href="../index.html#projects">Back to Portfolio</a>
+        </header>
+
+        <section class="hero">
+            <h1>Take on Me: Reimagined</h1>
+            <br>
+            <p class="lead">
+                This section presents a concept website for a rotoscope project, covering planning, frame extraction,
+                tracing workflow, and final compositing. The objective is to preserve realistic motion while introducing
+                a stylized visual language.
+            </p>
+
+            <h2 class="hero-video-title">Sample Actor for Rotoscope</h2>
+            <figure class="hero-video-wrap">
+                <video id="heroVideo" class="hero-video" autoplay muted loop playsinline preload="auto" width="360" height="204" style="width:100%;max-width:360px;height:204px;object-fit:cover;" aria-label="Homepage banner video">
+                    <source id="heroVideoSource" src="../media/videos/bannervideo.mp4" type="video/mp4" />
+                    Your browser cannot play this video format.
+                </video>
+                <figcaption class="hero-video-controls">
+                    <button id="heroMuteToggle" class="video-mute-btn" type="button" aria-pressed="false">Mute Video</button>
+                </figcaption>
+            </figure>
+            <p id="heroVideoStatus" class="video-status" hidden>Video could not be loaded here. The clip is display-only.</p>
+            <p><i>Videos are used for Educational Purposes Only</i></p>
+
+            <div class="cards">
+                <article class="card">
+                    <h2>Project Goal</h2>
+                    <p>Create a short animation sequence with realistic movement and hand-drawn artistic expression.</p>
+                </article>
+                <article class="card">
+                    <h2>Main Tools</h2>
+                    <p>Adobe Premiere Pro, CLIPART STUDIO, and timeline-based compositing for output refinement.</p>
+                </article>
+            </div>
+            <br>
+        
+            <h2>Procedures:</h2>
+            <ol class="steps">
+                <li>Record or select reference footage with stable movement.</li>
+                <li>Break footage into key frames and define frame rate targets.</li>
+                <li>Trace and stylize each frame while preserving motion continuity.</li>
+                <li>Composite all frames, apply color treatment, and render final sequence.</li>
+            </ol>
+
+            <section class="progress-section" aria-labelledby="weekly-progress-title">
+                <h2 id="weekly-progress-title" class="progress-title">Rotoscope Weekly Progress</h2>
+                <p class="progress-note">Week 1 and 2 progress video:</p>
+                <figure class="progress-video-wrap">
+                    <video id="progressVideo" class="progress-video" preload="metadata" width="560" height="315" aria-label="Rotoscope Week 1 progress video">
+                        <source src="../media/videos/ProgressRoto/WEEK%231.mp4" type="video/mp4" />
+                        Your browser cannot play this video format.
+                    </video>
+                    <figcaption class="progress-controls">
+                        <button id="progressPlayToggle" class="progress-btn" type="button" aria-pressed="false">Play</button>
+                        <button id="progressMuteToggle" class="progress-btn" type="button" aria-pressed="false">Mute</button>
+                        <input id="progressSeek" class="progress-seek" type="range" min="0" max="100" value="0" step="0.1" aria-label="Seek week 1 video timeline" />
+                        <span id="progressTime" class="progress-time">0:00 / 0:00</span>
+                    </figcaption>
+                </figure>
+            </section>
+        </section>
+    </div>
+
+    <script>
+        const heroVideo = document.getElementById("heroVideo");
+        const heroMuteToggle = document.getElementById("heroMuteToggle");
+        const heroVideoSource = document.getElementById("heroVideoSource");
+        const heroVideoStatus = document.getElementById("heroVideoStatus");
+
+        if (heroVideo && heroMuteToggle) {
+            const sourceCandidates = [
+                "../media/videos/bannervideo.mp4",
+                "../media/videos/BannerVideo.mp4"
+            ];
+            let currentSourceIndex = 0;
+
+            const updateMuteButton = () => {
+                const muted = heroVideo.muted;
+                heroMuteToggle.textContent = muted ? "Unmute Video" : "Mute Video";
+                heroMuteToggle.setAttribute("aria-pressed", String(!muted));
+            };
+
+            const setVideoSource = (index) => {
+                if (!heroVideoSource) return;
+                heroVideoSource.src = sourceCandidates[index];
+                heroVideo.load();
+            };
+
+            const tryAutoplayMuted = async () => {
+                heroVideo.muted = true;
+                try {
+                    await heroVideo.play();
+                } catch (error) {
+                    // Ignore if autoplay is blocked until user interaction.
+                }
+                updateMuteButton();
+            };
+
+            if (heroVideoSource) {
+                heroVideoSource.addEventListener("error", () => {
+                    currentSourceIndex += 1;
+                    if (currentSourceIndex < sourceCandidates.length) {
+                        setVideoSource(currentSourceIndex);
+                        tryAutoplayMuted();
+                        return;
+                    }
+
+                    if (heroVideoStatus) {
+                        heroVideoStatus.hidden = false;
+                    }
+                });
+            }
+
+            tryAutoplayMuted();
+
+            heroMuteToggle.addEventListener("click", async () => {
+                heroVideo.muted = !heroVideo.muted;
+                if (heroVideo.paused) {
+                    try {
+                        await heroVideo.play();
+                    } catch (error) {
+                        // Ignore play rejection and keep current state.
+                    }
+                }
+                updateMuteButton();
+            });
+        }
+
+        const progressVideo = document.getElementById("progressVideo");
+        const progressPlayToggle = document.getElementById("progressPlayToggle");
+        const progressMuteToggle = document.getElementById("progressMuteToggle");
+        const progressSeek = document.getElementById("progressSeek");
+        const progressTime = document.getElementById("progressTime");
+
+        if (progressVideo && progressPlayToggle && progressMuteToggle && progressSeek && progressTime) {
+            const formatTime = (time) => {
+                if (!Number.isFinite(time) || time < 0) return "0:00";
+                const total = Math.floor(time);
+                const mins = Math.floor(total / 60);
+                const secs = String(total % 60).padStart(2, "0");
+                return `${mins}:${secs}`;
+            };
+
+            const updatePlayButton = () => {
+                const isPlaying = !progressVideo.paused && !progressVideo.ended;
+                progressPlayToggle.textContent = isPlaying ? "Pause" : "Play";
+                progressPlayToggle.setAttribute("aria-pressed", String(isPlaying));
+            };
+
+            const updateMuteButton = () => {
+                progressMuteToggle.textContent = progressVideo.muted ? "Unmute" : "Mute";
+                progressMuteToggle.setAttribute("aria-pressed", String(progressVideo.muted));
+            };
+
+            const updateTimeline = () => {
+                const duration = progressVideo.duration || 0;
+                const current = progressVideo.currentTime || 0;
+                const ratio = duration > 0 ? (current / duration) * 100 : 0;
+                progressSeek.value = String(ratio);
+                progressTime.textContent = `${formatTime(current)} / ${formatTime(duration)}`;
+            };
+
+            progressPlayToggle.addEventListener("click", async () => {
+                if (progressVideo.paused) {
+                    try {
+                        await progressVideo.play();
+                    } catch (error) {
+                        // Ignore play errors.
+                    }
+                } else {
+                    progressVideo.pause();
+                }
+                updatePlayButton();
+            });
+
+            progressMuteToggle.addEventListener("click", () => {
+                progressVideo.muted = !progressVideo.muted;
+                updateMuteButton();
+            });
+
+            progressSeek.addEventListener("input", () => {
+                if (!progressVideo.duration) return;
+                const percent = Number(progressSeek.value);
+                progressVideo.currentTime = (percent / 100) * progressVideo.duration;
+                updateTimeline();
+            });
+
+            progressVideo.addEventListener("timeupdate", updateTimeline);
+            progressVideo.addEventListener("loadedmetadata", updateTimeline);
+            progressVideo.addEventListener("play", updatePlayButton);
+            progressVideo.addEventListener("pause", updatePlayButton);
+            progressVideo.addEventListener("ended", updatePlayButton);
+
+            updatePlayButton();
+            updateMuteButton();
+            updateTimeline();
+        }
+    </script>
+</body>
+</html>

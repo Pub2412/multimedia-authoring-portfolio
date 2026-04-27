@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Solar System Project</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Gloria+Hallelujah&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --space: #091120;
+            --space-soft: #111d34;
+            --ink: #f2f7ff;
+            --muted: #b4c4db;
+            --card: rgba(15, 26, 46, 0.8);
+            --border: rgba(180, 196, 219, 0.35);
+            --sun: #ffbe3b;
+            --shadow: 0 14px 26px rgba(0, 0, 0, 0.32);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Montserrat", sans-serif;
+            color: var(--ink);
+            min-height: 100vh;
+            background: radial-gradient(1000px 600px at 20% 10%, rgba(65, 100, 146, 0.26), transparent 60%), linear-gradient(160deg, var(--space), var(--space-soft));
+        }
+
+        .wrap {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 28px 20px 48px;
+        }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .brand {
+            font-family: "Gloria Hallelujah", cursive;
+            font-size: clamp(1.4rem, 4vw, 2.1rem);
+        }
+
+        .back-link {
+            text-decoration: none;
+            color: var(--ink);
+            border: 1px solid var(--border);
+            border-radius: 14px 6px 12px 8px;
+            padding: 9px 12px;
+            font-weight: 700;
+            background: rgba(22, 39, 67, 0.75);
+        }
+
+        .hero {
+            background: var(--card);
+            border: 2px solid var(--border);
+            border-radius: 20px 8px 16px 12px;
+            box-shadow: var(--shadow);
+            padding: 24px;
+        }
+
+        h1 {
+            font-family: "Gloria Hallelujah", cursive;
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            margin-bottom: 12px;
+            line-height: 1.05;
+        }
+
+        .lead {
+            color: var(--muted);
+            max-width: 68ch;
+            line-height: 1.6;
+            margin-bottom: 18px;
+        }
+
+        .orbit-grid {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 14px;
+        }
+
+        .orbit-card {
+            grid-column: span 4;
+            border: 1px solid var(--border);
+            border-radius: 16px 8px 12px 10px;
+            padding: 16px;
+            background: rgba(12, 22, 40, 0.9);
+        }
+
+        .orbit-card h2 {
+            font-size: 1.05rem;
+            margin-bottom: 8px;
+            color: var(--sun);
+        }
+
+        .orbit-card p {
+            line-height: 1.5;
+            color: var(--muted);
+        }
+
+        .quick-list {
+            margin-top: 18px;
+            padding-left: 20px;
+        }
+
+        .quick-list li {
+            margin-bottom: 8px;
+            line-height: 1.45;
+            color: var(--muted);
+        }
+
+        @media (max-width: 860px) {
+            .orbit-card {
+                grid-column: span 6;
+            }
+        }
+
+        @media (max-width: 620px) {
+            .orbit-card {
+                grid-column: span 12;
+            }
+
+            .top {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <header class="top">
+            <div class="brand">Solar System Project</div>
+            <a class="back-link" href="../index.html#projects">Back to Portfolio</a>
+        </header>
+
+        <section class="hero">
+            <h1>Solar System: Interactive Learning Concept</h1>
+            <p class="lead">
+                This project section demonstrates a concept website for a solar system experience, combining visual
+                storytelling with educational content. The page structure is designed for responsive viewing and
+                expandable sections for each planetary system.
+            </p>
+
+            <div class="orbit-grid">
+                <article class="orbit-card">
+                    <h2>Sun and Inner Planets</h2>
+                    <p>Focuses on Mercury, Venus, Earth, and Mars with compact content cards and quick comparisons.</p>
+                </article>
+                <article class="orbit-card">
+                    <h2>Gas Giants</h2>
+                    <p>Explains Jupiter and Saturn features such as rings, storms, and scale relative to Earth.</p>
+                </article>
+                <article class="orbit-card">
+                    <h2>Ice Giants and Beyond</h2>
+                    <p>Introduces Uranus, Neptune, and outer-zone objects to complete the system overview.</p>
+                </article>
+            </div>
+
+            <ul class="quick-list">
+                <li>Responsive card layout for desktop and mobile visitors.</li>
+                <li>Structured content blocks for science facts and media assets.</li>
+                <li>Ready for future JavaScript enhancements like orbital animation and filters.</li>
+            </ul>
+        </section>
+    </div>
+</body>
+</html>

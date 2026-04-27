@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multimedia and Authoring Creative Portoflio - Haboc</title>
+    <link rel="icon" href="media/images/famicon.ico" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Gloria+Hallelujah&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <svg width="0" height="0" style="position:absolute; left:-9999px;">
+        <filter id="pencilSketch">
+            <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="noise"></feTurbulence>
+            <feColorMatrix in="noise" type="saturate" values="0" result="monoNoise"></feColorMatrix>
+            <feBlend in="SourceGraphic" in2="monoNoise" mode="multiply"></feBlend>
+        </filter>
+    </svg>
+    <div class="texture"></div>
+
+    <header>
+        <nav class="nav">
+            <div class="brand">Multimedia and Authoring Portfolio</div>
+            <button id="menuToggle" class="menu-toggle" type="button" aria-expanded="false" aria-controls="primaryNav" aria-label="Toggle navigation menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul class="nav-links" id="primaryNav">
+                <li class="has-dropdown">
+                    <button id="projectsMenuButton" class="nav-link-btn" type="button" aria-expanded="false" aria-controls="projectsMenu">Projects</button>
+                    <ul id="projectsMenu" class="dropdown-menu" aria-label="Projects menu">
+                        <li><a href="sections/rotoscope.html">Rotoscope</a></li>
+                        <li><a href="sections/solar-system.html">Solar System</a></li>
+                    </ul>
+                </li>
+                <li><a href="#gallery">About</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero reveal" id="home">
+            <div>
+                <div class="kicker">Multimedia &amp; Authoring</div>
+                <h1>Creativity in Motion</h1>
+                <p>This portfolio highlights creative outputs such as Rotoscoping Animation and 3D Modeling.</p>
+                <div class="actions">
+                    <a class="btn btn-primary" href="#projects">View Projects</a>
+                    <a class="btn btn-ghost" href="#contact">Collaborate</a>
+                </div>
+            </div>
+
+            <aside class="hero-card">
+                <h2>Creative Focus Meter</h2>
+                <div class="meter">
+                    <div class="meter-head"><span>Visual Design</span><span>92%</span></div>
+                    <div class="meter-track"><div class="meter-fill" style="--fill: 92%"></div></div>
+                </div>
+                <div class="meter">
+                    <div class="meter-head"><span>Video Editing</span><span>85%</span></div>
+                    <div class="meter-track"><div class="meter-fill" style="--fill: 85%"></div></div>
+                </div>
+                <div class="meter">
+                    <div class="meter-head"><span>Web Authoring</span><span>89%</span></div>
+                    <div class="meter-track"><div class="meter-fill" style="--fill: 89%"></div></div>
+                </div>
+                <div class="meter">
+                    <div class="meter-head"><span>Sound Design</span><span>78%</span></div>
+                    <div class="meter-track"><div class="meter-fill" style="--fill: 78%"></div></div>
+                </div>
+            </aside>
+        </section>
+
+        <section id="projects" class="reveal">
+            <div class="section-head">
+                <h2 class="section-title">Featured Projects</h2>
+                <p class="section-note">Filter the portfolio by media type and open each card to view concept notes.</p>
+            </div>
+
+            <div class="filters" id="filters">
+                <button class="filter-btn active" data-filter="all" type="button">All</button>
+                <button class="filter-btn" data-filter="video" type="button">Video</button>
+                <button class="filter-btn" data-filter="web" type="button">Web</button>
+                <button class="filter-btn" data-filter="audio" type="button">Audio</button>
+                <button class="filter-btn" data-filter="print" type="button">Print</button>
+            </div>
+
+            <div class="grid" id="projectGrid">
+                <article class="project" data-type="video">
+                    <div class="project-top">
+                        <span class="tag">Video</span>
+                        <span class="tag">Premiere Pro</span>
+                    </div>
+                    <div class="thumb" style="background-image: linear-gradient(135deg, #ff9f1c, #e71d36);"></div>
+                    <h3>Pulse City Intro Sequence</h3>
+                    <p>A 45-second title sequence combining kinetic typography and urban footage for a digital short film.</p>
+                    <button class="mini-btn" type="button" data-project="Pulse City Intro Sequence">Read Process</button>
+                </article>
+
+                <article class="project" data-type="web">
+                    <div class="project-top">
+                        <span class="tag">Web</span>
+                        <span class="tag">HTML/CSS/JS</span>
+                    </div>
+                    <div class="thumb" style="background-image: linear-gradient(135deg, #00b4d8, #0077b6);"></div>
+                    <h3>Interactive Magazine Spread</h3>
+                    <p>A responsive online editorial that includes scroll-triggered animations and audio snippets per section.</p>
+                    <button class="mini-btn" type="button" data-project="Interactive Magazine Spread">Read Process</button>
+                </article>
+
+                <article class="project" data-type="audio">
+                    <div class="project-top">
+                        <span class="tag">Audio</span>
+                        <span class="tag">Audition</span>
+                    </div>
+                    <div class="thumb" style="background-image: linear-gradient(135deg, #8338ec, #3a0ca3);"></div>
+                    <h3>Forest Ambience Soundscape</h3>
+                    <p>An immersive stereo environment layered from foley and synthesized textures for a game prototype.</p>
+                    <button class="mini-btn" type="button" data-project="Forest Ambience Soundscape">Read Process</button>
+                </article>
+
+                <article class="project" data-type="print">
+                    <div class="project-top">
+                        <span class="tag">Print</span>
+                        <span class="tag">InDesign</span>
+                    </div>
+                    <div class="thumb" style="background-image: linear-gradient(135deg, #06d6a0, #1b9aaa);"></div>
+                    <h3>Culture Zine Layout System</h3>
+                    <p>A modular print and PDF zine system with bold grids, custom iconography, and accessible hierarchy.</p>
+                    <button class="mini-btn" type="button" data-project="Culture Zine Layout System">Read Process</button>
+                </article>
+            </div>
+        </section>
+
+        <section id="journey" class="reveal">
+            <div class="section-head">
+                <h2 class="section-title">Creative Journey</h2>
+                <p class="section-note">A timeline of growth in multimedia and authoring practices.</p>
+            </div>
+
+            <div class="timeline">
+                <article class="timeline-item">
+                    <div class="timeline-year">2024</div>
+                    <div>
+                        <h3>Foundation in Visual Storytelling</h3>
+                        <p>Learned color theory, framing, and narrative pacing through photo and motion exercises.</p>
+                    </div>
+                </article>
+                <article class="timeline-item">
+                    <div class="timeline-year">2025</div>
+                    <div>
+                        <h3>Interactive Media Authoring</h3>
+                        <p>Built web-based experiences combining animation timing, UX writing, and audience flow.</p>
+                    </div>
+                </article>
+                <article class="timeline-item">
+                    <div class="timeline-year">2026</div>
+                    <div>
+                        <h3>Cross-Media Production</h3>
+                        <p>Integrated video, print, and sound into cohesive campaign concepts for academic showcases.</p>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section id="gallery" class="reveal">
+            <div class="section-head">
+                <h2 class="section-title">Visual Gallery</h2>
+                <p class="section-note">Tap any tile to preview artwork in a larger view.</p>
+            </div>
+
+            <div class="gallery" id="galleryGrid">
+                <button type="button" data-caption="Motion frame exploration">
+                    <img src="https://images.unsplash.com/photo-1558655146-d09347e92766?auto=format&fit=crop&w=800&q=80" alt="Colorful abstract motion frame">
+                </button>
+                <button type="button" data-caption="Studio still life composition">
+                    <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80" alt="Creative workstation with monitor">
+                </button>
+                <button type="button" data-caption="Editorial typography tests">
+                    <img src="https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=800&q=80" alt="Printed magazine mockups">
+                </button>
+                <button type="button" data-caption="Audio session sound mapping">
+                    <img src="https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=800&q=80" alt="Audio mixing setup">
+                </button>
+            </div>
+        </section>
+
+        <section id="contact" class="reveal">
+            <div class="section-head">
+                <h2 class="section-title">Contact</h2>
+                <p class="section-note">Available for creative collaboration. Send a message using the validated form.</p>
+            </div>
+
+            <div class="contact-grid">
+                <div class="project" style="grid-column: span 12;">
+                    <p><strong>Name:</strong> Lance Grant E. Haboc</p>
+                    <p><strong>Email:</strong> lance.haboc204@gmail.com</p>
+                    <p><strong>Focus:</strong> Multimedia storytelling, Rotoscoping Animation</p>
+                </div>
+
+                <form id="contactForm" class="contact-form" novalidate>
+                    <div class="field-group">
+                        <label for="fullName">Full Name</label>
+                        <input id="fullName" name="fullName" type="text" required minlength="2" maxlength="80" pattern="^[A-Za-z][A-Za-z .'-]{1,79}$" autocomplete="name" aria-describedby="fullNameError">
+                        <p class="field-error" id="fullNameError" role="alert"></p>
+                    </div>
+
+                    <div class="field-group">
+                        <label for="emailAddress">Email Address</label>
+                        <input id="emailAddress" name="emailAddress" type="email" required maxlength="120" autocomplete="email" aria-describedby="emailAddressError">
+                        <p class="field-error" id="emailAddressError" role="alert"></p>
+                    </div>
+
+                    <div class="field-group">
+                        <label for="projectTopic">Project Topic</label>
+                        <select id="projectTopic" name="projectTopic" required aria-describedby="projectTopicError">
+                            <option value="">Select a project type</option>
+                            <option value="rotoscope">Rotoscope Animation</option>
+                            <option value="solar-system">Solar System</option>
+                            <option value="other">Other Multimedia Work</option>
+                        </select>
+                        <p class="field-error" id="projectTopicError" role="alert"></p>
+                    </div>
+
+                    <div class="field-group">
+                        <label for="message">Message</label>
+                        <textarea id="message" name="message" rows="5" required minlength="20" maxlength="600" aria-describedby="messageError"></textarea>
+                        <p class="field-error" id="messageError" role="alert"></p>
+                    </div>
+
+                    <button type="submit" class="mini-btn">Send Message</button>
+                    <p id="formStatus" class="form-status" aria-live="polite"></p>
+                </form>
+            </div>
+        </section>
+
+        <footer>
+            Multimedia and Authoring Portfolio | © Lance Grant Haboc <span id="year"></span>
+        </footer>
+    </main>
+
+    <div class="modal" id="modal" aria-hidden="true">
+        <div class="modal-content">
+            <img class="modal-media" id="modalImage" src="data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=" alt="Expanded gallery artwork">
+            <div class="modal-copy">
+                <p id="modalCaption"></p>
+                <button class="close-btn" id="closeModal" type="button">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
