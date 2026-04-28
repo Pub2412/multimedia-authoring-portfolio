@@ -3,20 +3,24 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Solar System Project</title>
+    <title>The Solar System</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Gloria+Hallelujah&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet" />
     <style>
         :root {
-            --space: #091120;
-            --space-soft: #111d34;
+            --space: #050b15;
+            --space-soft: #0d1830;
             --ink: #f2f7ff;
             --muted: #b4c4db;
-            --card: rgba(15, 26, 46, 0.8);
-            --border: rgba(180, 196, 219, 0.35);
+            --card: rgba(10, 18, 34, 0.84);
+            --card-strong: rgba(7, 13, 25, 0.94);
+            --border: rgba(180, 196, 219, 0.28);
             --sun: #ffbe3b;
-            --shadow: 0 14px 26px rgba(0, 0, 0, 0.32);
+            --accent: #7cd4ff;
+            --accent-2: #9b8cff;
+            --shadow: 0 18px 34px rgba(0, 0, 0, 0.38);
+            --panel-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 18px 30px rgba(0, 0, 0, 0.3);
         }
 
         * {
@@ -29,13 +33,32 @@
             font-family: "Montserrat", sans-serif;
             color: var(--ink);
             min-height: 100vh;
-            background: radial-gradient(1000px 600px at 20% 10%, rgba(65, 100, 146, 0.26), transparent 60%), linear-gradient(160deg, var(--space), var(--space-soft));
+            background:
+                radial-gradient(900px 520px at 15% 10%, rgba(124, 212, 255, 0.16), transparent 55%),
+                radial-gradient(700px 420px at 85% 12%, rgba(155, 140, 255, 0.16), transparent 50%),
+                linear-gradient(160deg, var(--space), var(--space-soft));
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                radial-gradient(rgba(255, 255, 255, 0.22) 1px, transparent 1px),
+                radial-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px);
+            background-size: 140px 140px, 220px 220px;
+            background-position: 0 0, 70px 40px;
+            opacity: 0.12;
         }
 
         .wrap {
-            max-width: 1000px;
+            max-width: 1180px;
             margin: 0 auto;
-            padding: 28px 20px 48px;
+            padding: 28px 20px 56px;
+            position: relative;
+            z-index: 1;
         }
 
         .top {
@@ -59,6 +82,18 @@
             padding: 9px 12px;
             font-weight: 700;
             background: rgba(22, 39, 67, 0.75);
+            transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+        }
+
+        .back-link:hover,
+        .back-link:focus-visible,
+        .cta-button:hover,
+        .cta-button:focus-visible,
+        .planet-button:hover,
+        .planet-button:focus-visible {
+            transform: translateY(-1px);
+            border-color: rgba(124, 212, 255, 0.8);
+            outline: none;
         }
 
         .hero {
@@ -67,6 +102,10 @@
             border-radius: 20px 8px 16px 12px;
             box-shadow: var(--shadow);
             padding: 24px;
+            display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            gap: 22px;
+            align-items: center;
         }
 
         h1 {
@@ -83,8 +122,501 @@
             margin-bottom: 18px;
         }
 
-        .orbit-grid {
+        .hero-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .cta-button,
+        .planet-button,
+        .ghost-button,
+        .mode-pill,
+        .power-switch {
+            border: 1px solid var(--border);
+            background: rgba(18, 30, 52, 0.86);
+            color: var(--ink);
+            font: inherit;
+            cursor: pointer;
+        }
+
+        .cta-button {
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            padding: 0 16px;
+            border-radius: 14px 6px 14px 10px;
+            font-weight: 800;
+            background: linear-gradient(135deg, rgba(124, 212, 255, 0.22), rgba(155, 140, 255, 0.22));
+            transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+        }
+
+        .ghost-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            padding: 0 16px;
+            border-radius: 12px 14px 10px 8px;
+            font-weight: 700;
+        }
+
+        .status-card {
+            border: 1px solid var(--border);
+            border-radius: 18px 10px 16px 12px;
+            padding: 16px;
+            background: rgba(5, 12, 25, 0.9);
+            box-shadow: var(--panel-shadow);
+        }
+
+        .status-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent);
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            margin-bottom: 12px;
+        }
+
+        .status-label::before {
+            content: "";
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 0 8px rgba(124, 212, 255, 0.12);
+        }
+
+        .placeholder-frame {
+            position: relative;
+            min-height: 320px;
+            border-radius: 18px 8px 16px 12px;
+            overflow: hidden;
+            border: 1px dashed rgba(180, 196, 219, 0.35);
+            background:
+                radial-gradient(closest-side at 50% 45%, rgba(124, 212, 255, 0.28), transparent 70%),
+                linear-gradient(180deg, rgba(17, 28, 50, 0.95), rgba(6, 11, 20, 0.95));
+        }
+
+        .placeholder-frame video,
+        .placeholder-frame img,
+        .placeholder-frame iframe {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            min-height: 320px;
+            background: #08111f;
+        }
+
+        .placeholder-overlay {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(180deg, rgba(6, 11, 20, 0.14), rgba(6, 11, 20, 0.76));
+        }
+
+        .placeholder-overlay strong {
+            display: block;
+            font-family: "Gloria Hallelujah", cursive;
+            font-size: 1.55rem;
+            margin-bottom: 8px;
+        }
+
+        .placeholder-overlay p {
+            color: var(--muted);
+            max-width: 32ch;
+            line-height: 1.5;
+            margin: 0 auto;
+        }
+
+        .section-shell {
+            margin-top: 18px;
+            background: var(--card);
+            border: 2px solid var(--border);
+            border-radius: 20px 8px 16px 12px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+        }
+
+        .section-title {
+            font-family: "Gloria Hallelujah", cursive;
+            font-size: clamp(1.7rem, 3.8vw, 2.45rem);
+            margin-bottom: 10px;
+        }
+
+        .section-note {
+            color: var(--muted);
+            line-height: 1.6;
+            max-width: 72ch;
+        }
+
+        .cockpit-layout {
             margin-top: 20px;
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 18px;
+        }
+
+        .viewfinder {
+            position: relative;
+            min-height: 420px;
+            border-radius: 24px 12px 18px 12px;
+            border: 1px solid rgba(124, 212, 255, 0.28);
+            background:
+                radial-gradient(circle at center, rgba(124, 212, 255, 0.18), transparent 32%),
+                linear-gradient(180deg, rgba(11, 19, 34, 0.92), rgba(3, 7, 14, 0.98));
+            overflow: hidden;
+            box-shadow: var(--panel-shadow);
+        }
+
+        .radar-grid {
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(rgba(124, 212, 255, 0.12) 1px, transparent 1px), linear-gradient(90deg, rgba(124, 212, 255, 0.12) 1px, transparent 1px);
+            background-size: 42px 42px;
+            opacity: 0.35;
+        }
+
+        .scope-ring {
+            position: absolute;
+            inset: 12% 18%;
+            border-radius: 50%;
+            border: 1px solid rgba(124, 212, 255, 0.2);
+            box-shadow: 0 0 0 18px rgba(124, 212, 255, 0.04);
+        }
+
+        .scope-ring::before,
+        .scope-ring::after {
+            content: "";
+            position: absolute;
+            inset: 50%;
+            background: rgba(124, 212, 255, 0.18);
+            transform: translate(-50%, -50%);
+        }
+
+        .scope-ring::before {
+            width: 100%;
+            height: 1px;
+        }
+
+        .scope-ring::after {
+            width: 1px;
+            height: 100%;
+        }
+
+        .planet-display {
+            position: absolute;
+            inset: 0;
+            text-align: center;
+            padding: 24px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            z-index: 2;
+        }
+
+        .planet-orb {
+            width: 160px;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0) 28%), linear-gradient(135deg, #f7d56d, #9b8cff 65%, #3d4f8e);
+            box-shadow: 0 0 40px rgba(124, 212, 255, 0.22), 0 0 80px rgba(155, 140, 255, 0.12);
+            margin: 0 auto 18px;
+        }
+
+        .planet-video {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 0;
+            object-fit: cover;
+            display: none;
+            margin: 0;
+            box-shadow: none;
+            z-index: 1;
+        }
+
+        .planet-overlay {
+            position: relative;
+            width: 100%;
+            z-index: 2;
+            display: grid;
+            justify-items: center;
+            gap: 10px;
+        }
+
+        .planet-display.mercury-mode {
+            align-items: stretch;
+            padding: 18px;
+        }
+
+        .planet-display.mercury-mode .planet-overlay {
+            height: 100%;
+            align-self: stretch;
+            justify-content: flex-start;
+            justify-items: start;
+            text-align: left;
+            padding: 0;
+        }
+
+        .planet-display.mercury-mode .planet-video {
+            box-shadow: none;
+            filter: none;
+        }
+
+        .planet-display.mercury-mode .planet-name,
+        .planet-display.mercury-mode .planet-copy {
+            position: relative;
+            z-index: 1;
+        }
+
+        .planet-display.mercury-mode .planet-name {
+            margin: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 0 0 10px 0;
+            text-shadow: none;
+        }
+
+        .planet-display.mercury-mode .planet-copy {
+            display: none;
+        }
+
+        .planet-display.mercury-mode .viewfinder-meta {
+            display: none;
+        }
+
+        .planet-display.mercury-mode .mode-pill {
+            color: #f6fbff;
+            background: rgba(3, 7, 14, 0.46);
+            border-color: rgba(255, 255, 255, 0.12);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
+        }
+
+        .planet-display.mercury-mode .planet-overlay::before {
+            display: none;
+        }
+
+        .planet-overlay::before {
+            content: "";
+            position: absolute;
+            inset: -12px -18px auto;
+            height: 210px;
+            background: linear-gradient(180deg, rgba(3, 7, 14, 0.88), rgba(3, 7, 14, 0.18));
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .planet-orb[data-planet="Mars"] {
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 28%), linear-gradient(135deg, #ffcf8a, #e54b4b 62%, #7b2b24);
+        }
+
+        .planet-orb[data-planet="Jupiter"] {
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0) 28%), linear-gradient(135deg, #ffd8b0, #d89a59 58%, #734320);
+        }
+
+        .planet-orb[data-planet="Saturn"] {
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0) 28%), linear-gradient(135deg, #ffe5a1, #d8b26a 58%, #83643c);
+            position: relative;
+        }
+
+        .planet-orb[data-planet="Saturn"]::after {
+            content: "";
+            position: absolute;
+            inset: 40% -20%;
+            border-radius: 50%;
+            border: 10px solid rgba(214, 190, 142, 0.5);
+            transform: rotate(-18deg);
+        }
+
+        .planet-orb[data-planet="Earth"] {
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0) 28%), linear-gradient(135deg, #70e4ff, #2d78d6 58%, #0e3a69);
+        }
+
+        .planet-orb[data-planet="Venus"] {
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0) 28%), linear-gradient(135deg, #ffe9b2, #d7a96c 60%, #8d5b2d);
+        }
+
+        .planet-orb[data-planet="Sun"] {
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0) 26%), linear-gradient(135deg, #fff3a6, #ffb647 58%, #ff6b2d);
+            box-shadow: 0 0 48px rgba(255, 190, 59, 0.34), 0 0 96px rgba(255, 107, 45, 0.18);
+        }
+
+        .planet-orb[data-planet="Mercury"] {
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0) 28%), linear-gradient(135deg, #dbd8d2, #8f8d88 60%, #474747);
+        }
+
+        .planet-orb[data-planet="Uranus"] {
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0) 28%), linear-gradient(135deg, #c4fbff, #67d6e3 62%, #357d91);
+        }
+
+        .planet-orb[data-planet="Neptune"] {
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0) 28%), linear-gradient(135deg, #8fc2ff, #356ef0 62%, #10357e);
+        }
+
+        .planet-orb[data-planet="Pluto"] {
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0) 28%), linear-gradient(135deg, #e5dfd7, #a79c90 60%, #6d6258);
+        }
+
+        .planet-name {
+            font-family: "Gloria Hallelujah", cursive;
+            font-size: clamp(1.8rem, 4vw, 2.6rem);
+            margin-bottom: 8px;
+        }
+
+        .planet-copy {
+            color: var(--muted);
+            max-width: 36ch;
+            line-height: 1.6;
+            margin: 0 auto 18px;
+        }
+
+        .viewfinder-meta {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .mode-pill {
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 0.88rem;
+            color: var(--accent);
+            background: rgba(124, 212, 255, 0.08);
+            cursor: default;
+        }
+
+        .controls {
+            display: grid;
+            gap: 14px;
+        }
+
+        .control-panel,
+        .description-panel {
+            border: 1px solid var(--border);
+            border-radius: 18px 10px 16px 12px;
+            padding: 16px;
+            background: var(--card-strong);
+            box-shadow: var(--panel-shadow);
+        }
+
+        .control-panel h3,
+        .description-panel h3 {
+            margin-bottom: 10px;
+            color: var(--sun);
+            font-size: 1rem;
+        }
+
+        .planet-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .planet-button {
+            min-height: 48px;
+            border-radius: 14px 8px 12px 10px;
+            padding: 10px 12px;
+            font-weight: 700;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+            transition: transform 180ms ease, border-color 180ms ease, background 180ms ease, opacity 180ms ease;
+        }
+
+        .planet-button::after {
+            content: "";
+            position: absolute;
+            inset: auto -30% -60% auto;
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(124, 212, 255, 0.3), transparent 65%);
+            opacity: 0.4;
+        }
+
+        .planet-button.active {
+            border-color: rgba(124, 212, 255, 0.9);
+            background: rgba(124, 212, 255, 0.14);
+            box-shadow: 0 0 0 1px rgba(124, 212, 255, 0.08), 0 0 24px rgba(124, 212, 255, 0.12);
+        }
+
+        .planet-button small {
+            display: block;
+            color: var(--muted);
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .description-panel p {
+            color: var(--muted);
+            line-height: 1.65;
+        }
+
+        .fuel-row {
+            margin-top: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .fuel-bar {
+            flex: 1;
+            height: 10px;
+            border-radius: 999px;
+            background: rgba(180, 196, 219, 0.18);
+            overflow: hidden;
+        }
+
+        .fuel-fill {
+            height: 100%;
+            width: 72%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+            transition: width 360ms ease;
+        }
+
+        .hyperspace {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 180ms ease;
+            z-index: 3;
+            background: #000;
+        }
+
+        .hyperspace video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            background: #000;
+        }
+
+        .viewfinder.warping .hyperspace {
+            opacity: 1;
+        }
+
+        .viewfinder.warping .planet-display {
+            opacity: 0;
+        }
+
+        .orbit-grid {
+            margin-top: 18px;
             display: grid;
             grid-template-columns: repeat(12, 1fr);
             gap: 14px;
@@ -96,6 +628,7 @@
             border-radius: 16px 8px 12px 10px;
             padding: 16px;
             background: rgba(12, 22, 40, 0.9);
+            box-shadow: var(--panel-shadow);
         }
 
         .orbit-card h2 {
@@ -120,13 +653,197 @@
             color: var(--muted);
         }
 
+        .placeholder-note {
+            margin-top: 14px;
+            color: var(--muted);
+            font-size: 0.95rem;
+            line-height: 1.55;
+        }
+
+        .age-shell {
+            margin-top: 18px;
+            background: var(--card);
+            border: 2px solid var(--border);
+            border-radius: 20px 8px 16px 12px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+        }
+
+        .age-panel {
+            margin-top: 18px;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 18px;
+        }
+
+        .age-controls,
+        .age-results {
+            border: 1px solid var(--border);
+            border-radius: 18px 10px 16px 12px;
+            padding: 16px;
+            background: var(--card-strong);
+            box-shadow: var(--panel-shadow);
+        }
+
+        .age-controls h3,
+        .age-results h3 {
+            margin-bottom: 10px;
+            color: var(--sun);
+            font-size: 1rem;
+        }
+
+        .age-field {
+            display: grid;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .age-field label {
+            font-weight: 700;
+        }
+
+        .age-field input {
+            width: 100%;
+            min-height: 44px;
+            border-radius: 12px 8px 12px 10px;
+            border: 1px solid var(--border);
+            padding: 10px 12px;
+            background: rgba(18, 30, 52, 0.86);
+            color: var(--ink);
+            font: inherit;
+        }
+
+        .age-field input:focus-visible {
+            outline: 2px solid rgba(124, 212, 255, 0.75);
+            outline-offset: 2px;
+        }
+
+        .age-hint {
+            color: var(--muted);
+            font-size: 0.92rem;
+            line-height: 1.5;
+        }
+
+        .age-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .age-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .age-card {
+            display: grid;
+            grid-template-columns: 64px 1fr;
+            gap: 12px;
+            align-items: center;
+            border: 1px solid rgba(180, 196, 219, 0.18);
+            border-radius: 16px 8px 12px 10px;
+            padding: 14px;
+            background: rgba(12, 22, 40, 0.86);
+        }
+
+        .age-card-badge {
+            width: 64px;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 18px rgba(0, 0, 0, 0.24);
+            background: linear-gradient(135deg, #dbd8d2, #8f8d88 60%, #474747);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .age-card-video {
+            width: 64px;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            object-fit: cover;
+            display: block;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 18px rgba(0, 0, 0, 0.24);
+            background: #111;
+        }
+
+        .age-card-badge::after {
+            content: "";
+            position: absolute;
+            inset: 12% 18% auto auto;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.22);
+            filter: blur(2px);
+        }
+
+        .age-card-badge[data-planet="Sun"] { background: linear-gradient(135deg, #fff3a6, #ffb647 58%, #ff6b2d); }
+        .age-card-badge[data-planet="Mercury"] { background: linear-gradient(135deg, #dbd8d2, #8f8d88 60%, #474747); }
+        .age-card-badge[data-planet="Venus"] { background: linear-gradient(135deg, #ffe9b2, #d7a96c 60%, #8d5b2d); }
+        .age-card-badge[data-planet="Earth"] { background: linear-gradient(135deg, #70e4ff, #2d78d6 58%, #0e3a69); }
+        .age-card-badge[data-planet="Mars"] { background: linear-gradient(135deg, #ffcf8a, #e54b4b 62%, #7b2b24); }
+        .age-card-badge[data-planet="Jupiter"] { background: linear-gradient(135deg, #ffd8b0, #d89a59 58%, #734320); }
+        .age-card-badge[data-planet="Saturn"] { background: linear-gradient(135deg, #ffe5a1, #d8b26a 58%, #83643c); }
+        .age-card-badge[data-planet="Uranus"] { background: linear-gradient(135deg, #c4fbff, #67d6e3 62%, #357d91); }
+        .age-card-badge[data-planet="Neptune"] { background: linear-gradient(135deg, #8fc2ff, #356ef0 62%, #10357e); }
+        .age-card-badge[data-planet="Pluto"] { background: linear-gradient(135deg, #e5dfd7, #a79c90 60%, #6d6258); }
+
+        .age-card h4 {
+            color: var(--sun);
+            margin-bottom: 6px;
+            font-size: 1rem;
+        }
+
+        .age-card strong {
+            display: block;
+            font-size: 1.2rem;
+            margin-bottom: 6px;
+        }
+
+        .age-card p {
+            color: var(--muted);
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+
+        .age-note {
+            margin-top: 12px;
+            color: var(--muted);
+            line-height: 1.55;
+        }
+
         @media (max-width: 860px) {
+            .hero,
+            .cockpit-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .age-panel {
+                grid-template-columns: 1fr;
+            }
+
             .orbit-card {
                 grid-column: span 6;
             }
         }
 
         @media (max-width: 620px) {
+            .hero {
+                padding: 18px;
+            }
+
+            .planet-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .viewfinder {
+                min-height: 360px;
+            }
+
             .orbit-card {
                 grid-column: span 12;
             }
@@ -145,34 +862,333 @@
         </header>
 
         <section class="hero">
-            <h1>Solar System: Interactive Learning Concept</h1>
-            <p class="lead">
-                This project section demonstrates a concept website for a solar system experience, combining visual
-                storytelling with educational content. The page structure is designed for responsive viewing and
-                expandable sections for each planetary system.
+            <div>
+                <h1>Explore OUR Galaxy</h1>
+                <p class="lead">
+                    This page starts with a full-width 3D solar system video placeholder, then drops into a cockpit-style
+                    experience where planet selection launches a hyperspace transition and updates the mission briefing.
+                </p>
+
+                <div class="hero-actions">
+                    <a class="cta-button" href="#cockpit">Enter Cockpit</a>
+                    <a class="ghost-button" href="#overview">See Concept Notes</a>
+                </div>
+
+                <p class="placeholder-note">Replace the placeholder panel with your 3D solar system video or embed when it is ready.</p>
+            </div>
+
+            <aside class="status-card" aria-label="Solar system media placeholder">
+                <div class="status-label">Main View</div>
+                <div class="placeholder-frame">
+                    <div class="placeholder-overlay">
+                        <div>
+                            <strong>3D Solar System Video Placeholder</strong>
+                            <p>Drop in your video or embed here. Until then, this panel shows where the main cinematic intro will sit.</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </section>
+
+        <section class="section-shell" id="cockpit">
+            <h2 class="section-title">Cockpit View</h2>
+            <p class="section-note">
+                The cockpit is designed like a command deck. The viewfinder keeps the selected planet in the center, and the planet controls below trigger a hyperspace jump plus the matching mission description.
             </p>
 
+            <div class="cockpit-layout">
+                <div class="viewfinder" id="viewfinder">
+                    <div class="radar-grid"></div>
+                    <div class="scope-ring"></div>
+                    <div class="hyperspace" aria-hidden="true">
+                        <video id="hyperspaceVideo" playsinline preload="auto">
+                            <source src="../media/videos/misc/LS.mp4" type="video/mp4" />
+                        </video>
+                    </div>
+                    <div class="planet-display">
+                        <video class="planet-video" id="planetVideo" playsinline loop muted preload="auto" aria-hidden="true">
+                            <source src="../media/videos/Planets/mercury.mp4" type="video/mp4" />
+                        </video>
+                        <div class="planet-overlay">
+                            <div class="planet-orb" id="planetOrb" data-planet="Earth"></div>
+                            <div class="planet-name" id="planetName">Earth</div>
+                            <p class="planet-copy" id="planetTagline">Homeworld selected. Press a planet below to route the cockpit display to a new destination.</p>
+                            <div class="viewfinder-meta">
+                                <span class="mode-pill" id="flightMode">Navigation Ready</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <aside class="controls">
+                    <div class="description-panel">
+                        <h3>Description</h3>
+                        <p id="planetDescription">
+                            Earth is currently centered in the viewfinder. Choose another planet to trigger the hyperspace effect and update this cockpit briefing.
+                        </p>
+                        <div class="fuel-row" aria-label="Distance from the Sun">
+                            <span>Distance from Sun</span>
+                            <div class="fuel-bar"><div class="fuel-fill" id="fuelFill"></div></div>
+                            <span id="fuelLabel">1 AU</span>
+                        </div>
+                    </div>
+
+                    <div class="control-panel">
+                        <h3>Space Ship Controls</h3>
+                        <div class="planet-buttons" id="planetButtons">
+                            <button class="planet-button" type="button" data-planet="Sun" data-copy="The Sun anchors the whole system. Select it to center the cockpit on the bright core of the solar model.">Sun<small>Central star</small></button>
+                            <button class="planet-button" type="button" data-planet="Mercury" data-copy="Fast, cratered, and closest to the Sun. This route gives the cockpit a quick inner-system jump.">Mercury<small>Inner orbit</small></button>
+                            <button class="planet-button" type="button" data-planet="Venus" data-copy="Thick clouds and intense heat define this destination, glowing bright in the cockpit scope.">Venus<small>Atmospheric world</small></button>
+                            <button class="planet-button active" type="button" data-planet="Earth" data-copy="A familiar blue planet with oceans, clouds, and the starting position for the cockpit display.">Earth<small>Current lock</small></button>
+                            <button class="planet-button" type="button" data-planet="Mars" data-copy="A red desert world with dust, canyons, and a strong sci-fi hyperspace visual.">Mars<small>Exploration target</small></button>
+                            <button class="planet-button" type="button" data-planet="Jupiter" data-copy="The largest planet, showing off storms, bands, and giant-scale cockpit telemetry.">Jupiter<small>Gas giant</small></button>
+                            <button class="planet-button" type="button" data-planet="Saturn" data-copy="Known for its rings and wide silhouette, ideal for a dramatic approach sequence.">Saturn<small>Ring system</small></button>
+                            <button class="planet-button" type="button" data-planet="Uranus" data-copy="An ice giant with a pale cyan tone, useful for a colder outer-system transition.">Uranus<small>Ice giant</small></button>
+                            <button class="planet-button" type="button" data-planet="Neptune" data-copy="A deep blue outer-world that closes the tour with a farthest-route jump.">Neptune<small>Outer edge</small></button>
+                            <button class="planet-button" type="button" data-planet="Pluto" data-copy="Pluto is a distant dwarf world at the edge of the system, giving the cockpit a final far-out destination.">Pluto<small>Dwarf planet</small></button>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </section>
+
+        <section class="age-shell" id="age-calculator">
+            <h2 class="section-title">Planet Age Calculator</h2>
+            <p class="section-note">
+                Enter your age in Earth years and see what that same lifespan looks like on each planet.
+                Smaller orbits make you older faster, while farther planets stretch your age out more slowly.
+            </p>
+
+            <div class="age-panel">
+                <aside class="age-controls">
+                    <h3>Convert Your Age</h3>
+                    <div class="age-field">
+                        <label for="earthAge">Age on Earth</label>
+                        <input id="earthAge" type="number" min="0" max="1200" step="0.1" value="18" />
+                        <p class="age-hint">Use decimal ages if you want a more exact result. Example: 18.5 years.</p>
+                    </div>
+
+                    <div class="age-actions">
+                        <button class="cta-button" id="calculateAgeBtn" type="button">Calculate</button>
+                        <button class="ghost-button" id="resetAgeBtn" type="button">Reset</button>
+                    </div>
+                </aside>
+
+                <div class="age-results">
+                    <h3>Planet Ages</h3>
+                    <div class="age-grid" id="ageGrid"></div>
+                    <p class="age-note" id="ageNote">Enter your Earth age and press Calculate to see how it changes across the solar system.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-shell" id="overview">
+            <h2 class="section-title">Concept Notes</h2>
             <div class="orbit-grid">
                 <article class="orbit-card">
-                    <h2>Sun and Inner Planets</h2>
-                    <p>Focuses on Mercury, Venus, Earth, and Mars with compact content cards and quick comparisons.</p>
+                    <h2>Programs Used:</h2>
+                    <p>Blender 5.1.1 and Javascript</p>
                 </article>
                 <article class="orbit-card">
-                    <h2>Gas Giants</h2>
-                    <p>Explains Jupiter and Saturn features such as rings, storms, and scale relative to Earth.</p>
+                    <h2>Cockpit Navigation</h2>
+                    <p>The cockpit uses a centered viewfinder, planet buttons below, and a hyperspace animation when a destination is selected.</p>
                 </article>
                 <article class="orbit-card">
-                    <h2>Ice Giants and Beyond</h2>
-                    <p>Introduces Uranus, Neptune, and outer-zone objects to complete the system overview.</p>
+                    <h2>Future Media Ready</h2>
+                    <p>The layout is prepared for images, videos, or interactive planet assets without changing the page structure.</p>
                 </article>
             </div>
 
             <ul class="quick-list">
-                <li>Responsive card layout for desktop and mobile visitors.</li>
-                <li>Structured content blocks for science facts and media assets.</li>
-                <li>Ready for future JavaScript enhancements like orbital animation and filters.</li>
+                <li>Responsive intro-and-cockpit flow for desktop and mobile visitors.</li>
+                <li>Placeholder panels for missing video or image embeds.</li>
+                <li>JavaScript-powered planet switching with a starship-style hyperspace transition.</li>
             </ul>
         </section>
     </div>
+
+    <script>
+        const viewfinder = document.getElementById("viewfinder");
+        const planetDisplay = document.querySelector(".planet-display");
+        const planetOrb = document.getElementById("planetOrb");
+        const planetVideo = document.getElementById("planetVideo");
+        const planetName = document.getElementById("planetName");
+        const planetTagline = document.getElementById("planetTagline");
+        const planetDescription = document.getElementById("planetDescription");
+        const planetButtons = document.querySelectorAll(".planet-button");
+        const fuelFill = document.getElementById("fuelFill");
+        const fuelLabel = document.getElementById("fuelLabel");
+        const flightMode = document.getElementById("flightMode");
+        const hyperspaceVideo = document.getElementById("hyperspaceVideo");
+        const maxDistanceAu = 39.5;
+        const earthAgeInput = document.getElementById("earthAge");
+        const calculateAgeBtn = document.getElementById("calculateAgeBtn");
+        const resetAgeBtn = document.getElementById("resetAgeBtn");
+        const ageGrid = document.getElementById("ageGrid");
+        const ageNote = document.getElementById("ageNote");
+
+        const planetData = {
+            Sun: {
+                tagline: "Central star locked.",
+                description: "The Sun is the bright core of the solar system and works as the cockpit's main anchor point.",
+                distanceAu: 0
+            },
+            Mercury: {
+                tagline: "Closest orbit lock engaged.",
+                description: "Mercury is a fast, cratered world that gives the cockpit a tight inner-system jump and a quick hyperspace exit.",
+                distanceAu: 0.39
+            },
+            Venus: {
+                tagline: "Atmospheric target acquired.",
+                description: "Venus fills the cockpit with a bright, cloud-heavy route and a high-contrast destination readout.",
+                distanceAu: 0.72
+            },
+            Earth: {
+                tagline: "Homeworld selected.",
+                description: "Earth stays centered as the default lock, giving the cockpit a familiar blue destination and a stable starting point.",
+                distanceAu: 1
+            },
+            Mars: {
+                tagline: "Red frontier engaged.",
+                description: "Mars is ideal for a dramatic hyperspace jump, with a dusty red surface and a strong exploration vibe.",
+                distanceAu: 1.52
+            },
+            Jupiter: {
+                tagline: "Gas giant route plotted.",
+                description: "Jupiter expands the cockpit telemetry with massive scale, storm bands, and a high-energy flyby feel.",
+                distanceAu: 5.2
+            },
+            Saturn: {
+                tagline: "Ring system aligned.",
+                description: "Saturn brings a wide-ring silhouette into the viewfinder for a cinematic command-deck arrival.",
+                distanceAu: 9.58
+            },
+            Uranus: {
+                tagline: "Outer ice giant targeted.",
+                description: "Uranus shifts the cockpit tone cooler and farther out, suggesting the edge of the system.",
+                distanceAu: 19.2
+            },
+            Neptune: {
+                tagline: "Far edge navigation complete.",
+                description: "Neptune closes the route with a deep-blue destination and the longest jump in the sequence.",
+                distanceAu: 30.05
+            },
+            Pluto: {
+                tagline: "Dwarf planet route plotted.",
+                description: "Pluto adds a distant edge-of-system destination and a colder, quieter finish to the cockpit tour.",
+                distanceAu: 39.5
+            }
+        };
+
+        const ageData = [
+            { name: "Mercury", period: 0.2408467, note: "Mercury completes a full orbit quickly, so one Earth year becomes many Mercury years." },
+            { name: "Venus", period: 0.61519726, note: "Venus orbits closer to the Sun than Earth, so your Venus age is still higher than Earth age." },
+            { name: "Earth", period: 1, note: "Earth is the baseline, so your Earth age stays the same." },
+            { name: "Mars", period: 1.8808158, note: "Mars takes almost twice as long to orbit the Sun, so time there moves more slowly." },
+            { name: "Jupiter", period: 11.862615, note: "Jupiter is far larger and slower around the Sun, so your age there drops sharply." },
+            { name: "Saturn", period: 29.447498, note: "Saturn's long orbital path makes each Saturn year much longer than an Earth year." },
+            { name: "Uranus", period: 84.016846, note: "Uranus takes decades to complete one orbit, so age counts change very slowly." },
+            { name: "Neptune", period: 164.79132, note: "Neptune is so far out that one Neptune year is a huge span of time." },
+            { name: "Pluto", period: 248.00, note: "Pluto's orbit is extremely long, so its year count is the most stretched of the set." }
+        ];
+
+        const formatPlanetAge = (earthAge, orbitalPeriod) => (earthAge / orbitalPeriod).toFixed(2);
+
+        const renderAgeCards = () => {
+            const earthAge = Number.parseFloat(earthAgeInput.value);
+            const safeEarthAge = Number.isFinite(earthAge) && earthAge >= 0 ? earthAge : 0;
+
+            ageGrid.innerHTML = ageData
+                .map((planet) => {
+                    const planetAge = formatPlanetAge(safeEarthAge, planet.period);
+                    const media = planet.name === "Mercury"
+                        ? `<video class="age-card-video" autoplay loop muted playsinline preload="auto" aria-hidden="true"><source src="../media/videos/Planets/mercury.mp4" type="video/mp4" /></video>`
+                        : `<div class="age-card-badge" data-planet="${planet.name}" aria-hidden="true"></div>`;
+
+                    return `
+                        <article class="age-card">
+                            ${media}
+                            <div>
+                                <h4>${planet.name}</h4>
+                                <strong>${planetAge} years</strong>
+                                <p>${planet.note}</p>
+                            </div>
+                        </article>
+                    `;
+                })
+                .join("");
+
+            ageNote.textContent = `At ${safeEarthAge.toFixed(1)} Earth years old, Mercury ages you the fastest and Pluto ages you the slowest.`;
+        };
+
+        const clearAgeCards = () => {
+            ageGrid.innerHTML = "";
+            ageNote.textContent = "Enter your Earth age and press Calculate to see how it changes across the solar system.";
+        };
+
+        const updateCockpit = (planetNameValue, sourceButton) => {
+            const data = planetData[planetNameValue] || planetData.Earth;
+
+            planetOrb.dataset.planet = planetNameValue;
+            const isMercury = planetNameValue === "Mercury";
+            planetDisplay.classList.toggle("mercury-mode", isMercury);
+            planetOrb.style.display = isMercury ? "none" : "block";
+            planetVideo.style.display = isMercury ? "block" : "none";
+            if (isMercury) {
+                planetVideo.currentTime = 0;
+                planetVideo.play().catch(() => {
+                    // Decorative video only; ignore playback failures.
+                });
+            } else {
+                planetVideo.pause();
+                planetVideo.currentTime = 0;
+            }
+            planetName.textContent = planetNameValue;
+            planetTagline.textContent = data.tagline;
+            planetDescription.textContent = sourceButton?.dataset.copy || data.description;
+            fuelFill.style.width = `${Math.max(0, Math.min(100, (data.distanceAu / maxDistanceAu) * 100))}%`;
+            fuelLabel.textContent = `${data.distanceAu} AU`;
+            flightMode.textContent = `${planetNameValue} Selected`;
+
+            planetButtons.forEach((button) => {
+                button.classList.toggle("active", button === sourceButton);
+            });
+        };
+
+        planetButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                if (!viewfinder || !hyperspaceVideo) {
+                    updateCockpit(button.dataset.planet, button);
+                    return;
+                }
+
+                viewfinder.classList.remove("warping");
+                void viewfinder.offsetWidth;
+                viewfinder.classList.add("warping");
+                flightMode.textContent = "Hyperspace Jump";
+
+                hyperspaceVideo.currentTime = 0;
+                hyperspaceVideo.play().catch(() => {
+                    // Ignore autoplay rejections and still update the cockpit.
+                });
+
+                window.setTimeout(() => {
+                    updateCockpit(button.dataset.planet, button);
+                    viewfinder.classList.remove("warping");
+                    hyperspaceVideo.pause();
+                    hyperspaceVideo.currentTime = 0;
+                }, 6000);
+            });
+        });
+
+        updateCockpit("Earth", document.querySelector('.planet-button[data-planet="Earth"]'));
+        clearAgeCards();
+
+        calculateAgeBtn.addEventListener("click", renderAgeCards);
+        resetAgeBtn.addEventListener("click", () => {
+            earthAgeInput.value = "18";
+            clearAgeCards();
+        });
+    </script>
 </body>
 </html>
