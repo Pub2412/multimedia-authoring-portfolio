@@ -873,6 +873,26 @@
                 flex-wrap: wrap;
             }
         }
+        /* Footer styles for the solar system page */
+        .site-footer {
+            margin-top: 28px;
+            border-top: 1px solid var(--border);
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            color: var(--muted);
+            font-size: 0.95rem;
+            border-radius: 12px;
+            background: linear-gradient(180deg, rgba(6, 11, 20, 0.28), rgba(6, 11, 20, 0.6));
+        }
+        .site-footer a { color: var(--accent); text-decoration: none; font-weight: 700; }
+        .site-footer .credits { font-size: 0.92rem; }
+
+        @media (max-width: 620px) {
+            .site-footer { flex-direction: column; align-items: flex-start; gap: 8px; }
+        }
     </style>
 </head>
 <body>
@@ -1033,6 +1053,10 @@
                 <li>JavaScript-powered planet switching with a starship-style hyperspace transition.</li>
             </ul>
         </section>
+            <footer class="site-footer" aria-label="Page footer">
+                <div class="credits">© 2026 Solar System Project — Created by Lancelot</div>
+                <div class="links"><a href="../index.html#projects">Back to Portfolio</a> · <a href="mailto:contact@example.com">Contact</a></div>
+            </footer>
     </div>
 
     <script>
