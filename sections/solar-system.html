@@ -565,6 +565,18 @@
             line-height: 1.65;
         }
 
+        .planet-facts {
+            margin-top: 12px;
+            padding-left: 18px;
+            display: grid;
+            gap: 6px;
+        }
+
+        .planet-facts li {
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
         .fuel-row {
             margin-top: 14px;
             display: flex;
@@ -926,6 +938,7 @@
                         <p id="planetDescription">
                             Earth is currently centered in the viewfinder. Choose another planet to trigger the hyperspace effect and update this cockpit briefing.
                         </p>
+                        <ul class="planet-facts" id="planetFacts"></ul>
                         <div class="fuel-row" aria-label="Distance from the Sun">
                             <span>Distance from Sun</span>
                             <div class="fuel-bar"><div class="fuel-fill" id="fuelFill"></div></div>
@@ -1015,6 +1028,7 @@
         const planetName = document.getElementById("planetName");
         const planetTagline = document.getElementById("planetTagline");
         const planetDescription = document.getElementById("planetDescription");
+        const planetFacts = document.getElementById("planetFacts");
         const planetButtons = document.querySelectorAll(".planet-button");
         const fuelFill = document.getElementById("fuelFill");
         const fuelLabel = document.getElementById("fuelLabel");
@@ -1031,51 +1045,61 @@
             Sun: {
                 tagline: "Central star locked.",
                 description: "The Sun is the bright core of the solar system and works as the cockpit's main anchor point.",
+                facts: ["Temperature: about 5,500°C at the surface", "Diameter: about 1.39 million km", "Role: contains more than 99% of the solar system's mass"],
                 distanceAu: 0
             },
             Mercury: {
                 tagline: "Closest orbit lock engaged.",
                 description: "Mercury is a fast, cratered world that gives the cockpit a tight inner-system jump and a quick hyperspace exit.",
+                facts: ["Surface temperature: about 430°C in daylight and -180°C at night", "Moons: 0", "Year length: 88 Earth days"],
                 distanceAu: 0.39
             },
             Venus: {
                 tagline: "Atmospheric target acquired.",
                 description: "Venus fills the cockpit with a bright, cloud-heavy route and a high-contrast destination readout.",
+                facts: ["Surface temperature: about 465°C", "Atmosphere: thick carbon dioxide with sulfuric acid clouds", "Day length: longer than its year"],
                 distanceAu: 0.72
             },
             Earth: {
                 tagline: "Homeworld selected.",
                 description: "Earth stays centered as the default lock, giving the cockpit a familiar blue destination and a stable starting point.",
+                facts: ["Surface temperature: roughly -89°C to 58°C", "Moons: 1", "Water: about 71% of the surface is covered by oceans"],
                 distanceAu: 1
             },
             Mars: {
                 tagline: "Red frontier engaged.",
                 description: "Mars is ideal for a dramatic hyperspace jump, with a dusty red surface and a strong exploration vibe.",
+                facts: ["Surface temperature: about -63°C on average", "Moons: 2", "Atmosphere: very thin and mostly carbon dioxide"],
                 distanceAu: 1.52
             },
             Jupiter: {
                 tagline: "Gas giant route plotted.",
                 description: "Jupiter expands the cockpit telemetry with massive scale, storm bands, and a high-energy flyby feel.",
+                facts: ["Cloud-top temperature: about -145°C", "Moons: 95+", "Feature: the Great Red Spot is a giant storm"],
                 distanceAu: 5.2
             },
             Saturn: {
                 tagline: "Ring system aligned.",
                 description: "Saturn brings a wide-ring silhouette into the viewfinder for a cinematic command-deck arrival.",
+                facts: ["Cloud-top temperature: about -178°C", "Moons: 145+", "Feature: its rings are made mostly of ice and rock"],
                 distanceAu: 9.58
             },
             Uranus: {
                 tagline: "Outer ice giant targeted.",
                 description: "Uranus shifts the cockpit tone cooler and farther out, suggesting the edge of the system.",
+                facts: ["Cloud-top temperature: about -224°C", "Moons: 27", "Feature: it rotates on its side"],
                 distanceAu: 19.2
             },
             Neptune: {
                 tagline: "Far edge navigation complete.",
                 description: "Neptune closes the route with a deep-blue destination and the longest jump in the sequence.",
+                facts: ["Cloud-top temperature: about -214°C", "Moons: 14", "Feature: it has the strongest winds in the solar system"],
                 distanceAu: 30.05
             },
             Pluto: {
                 tagline: "Dwarf planet route plotted.",
                 description: "Pluto adds a distant edge-of-system destination and a colder, quieter finish to the cockpit tour.",
+                facts: ["Surface temperature: about -229°C", "Moons: 5", "Orbit: a very long, tilted path around the Sun"],
                 distanceAu: 39.5
             }
         };
@@ -1146,6 +1170,7 @@
             planetName.textContent = planetNameValue;
             planetTagline.textContent = data.tagline;
             planetDescription.textContent = sourceButton?.dataset.copy || data.description;
+            planetFacts.innerHTML = (data.facts || []).map((fact) => `<li>${fact}</li>`).join("");
             fuelFill.style.width = `${Math.max(0, Math.min(100, (data.distanceAu / maxDistanceAu) * 100))}%`;
             fuelLabel.textContent = `${data.distanceAu} AU`;
             flightMode.textContent = `${planetNameValue} Selected`;
