@@ -654,6 +654,15 @@
             color: var(--muted);
         }
 
+        .orbit-steps {
+            margin-top: 10px;
+            padding-left: 20px;
+            display: grid;
+            gap: 8px;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
         .quick-list {
             margin-top: 18px;
             padding-left: 20px;
@@ -999,12 +1008,18 @@
             <h2 class="section-title">Concept Notes</h2>
             <div class="orbit-grid">
                 <article class="orbit-card">
-                    <h2>Programs Used:</h2>
-                    <p>Blender 5.1.1 and Javascript</p>
+                    <h2>3D Rendering Procedure</h2>
+                    <ol class="orbit-steps">
+                        <li>Model the planet in Blender with the correct proportions, surface shapes, and lighting setup.</li>
+                        <li>Apply materials and textures so the planet surface, clouds, rings, or atmosphere look realistic.</li>
+                        <li>Set the camera angle and animation timing for the render or video export.</li>
+                        <li>Use a Python script version to automate scene setup, object placement, or batch rendering.</li>
+                        <li>Render the final planet animation and export it for the Solar System page.</li>
+                    </ol>
                 </article>
                 <article class="orbit-card">
-                    <h2>Cockpit Navigation</h2>
-                    <p>The cockpit uses a centered viewfinder, planet buttons below, and a hyperspace animation when a destination is selected.</p>
+                    <h2>Programs used:</h2>
+                    <p>Blender 5.1.1, Python 3.8, and Javascript</p>
                 </article>
                 <article class="orbit-card">
                     <h2>Future Media Ready</h2>
