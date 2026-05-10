@@ -1,8 +1,365 @@
 <!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>Scripts</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scripts for the Solar System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Gloria+Hallelujah&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --space: #050b15;
+            --space-soft: #0d1830;
+            --ink: #f2f7ff;
+            --muted: #b4c4db;
+            --card: rgba(10, 18, 34, 0.84);
+            --card-strong: rgba(7, 13, 25, 0.94);
+            --border: rgba(180, 196, 219, 0.28);
+            --sun: #ffbe3b;
+            --accent: #7cd4ff;
+            --accent-2: #9b8cff;
+            --shadow: 0 18px 34px rgba(0, 0, 0, 0.38);
+            --panel-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 18px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Montserrat", sans-serif;
+            color: var(--ink);
+            min-height: 100vh;
+            background:
+                radial-gradient(900px 520px at 15% 10%, rgba(124, 212, 255, 0.16), transparent 55%),
+                radial-gradient(700px 420px at 85% 12%, rgba(155, 140, 255, 0.16), transparent 50%),
+                linear-gradient(160deg, var(--space), var(--space-soft));
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                radial-gradient(rgba(255, 255, 255, 0.22) 1px, transparent 1px),
+                radial-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px);
+            background-size: 140px 140px, 220px 220px;
+            background-position: 0 0, 70px 40px;
+            opacity: 0.12;
+        }
+
+        .wrap {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 28px 20px 56px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .brand {
+            font-family: "Gloria Hallelujah", cursive;
+            font-size: clamp(1.4rem, 4vw, 2.1rem);
+        }
+
+        .back-link,
+        .secondary-link {
+            text-decoration: none;
+            color: var(--ink);
+            border: 1px solid var(--border);
+            border-radius: 14px 6px 12px 8px;
+            padding: 9px 12px;
+            font-weight: 700;
+            background: rgba(22, 39, 67, 0.75);
+            transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .back-link:hover,
+        .back-link:focus-visible,
+        .secondary-link:hover,
+        .secondary-link:focus-visible {
+            transform: translateY(-1px);
+            border-color: rgba(124, 212, 255, 0.8);
+            outline: none;
+        }
+
+        .hero,
+        .section-shell {
+            background: var(--card);
+            border: 2px solid var(--border);
+            border-radius: 20px 8px 16px 12px;
+            box-shadow: var(--shadow);
+            padding: 24px;
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 22px;
+            align-items: start;
+        }
+
+        h1,
+        .section-title {
+            font-family: "Gloria Hallelujah", cursive;
+            line-height: 1.05;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            margin-bottom: 12px;
+        }
+
+        .lead,
+        .section-note,
+        .script-card p,
+        .script-card li {
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .lead {
+            max-width: 68ch;
+            margin-bottom: 18px;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .cta-button {
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            padding: 0 16px;
+            border-radius: 14px 6px 14px 10px;
+            font-weight: 800;
+            border: 1px solid var(--border);
+            color: var(--ink);
+            background: linear-gradient(135deg, rgba(124, 212, 255, 0.22), rgba(155, 140, 255, 0.22));
+            transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+        }
+
+        .cta-button:hover,
+        .cta-button:focus-visible {
+            transform: translateY(-1px);
+            border-color: rgba(124, 212, 255, 0.8);
+            outline: none;
+        }
+
+        .status-card,
+        .script-card {
+            border: 1px solid var(--border);
+            border-radius: 18px 10px 16px 12px;
+            padding: 16px;
+            background: var(--card-strong);
+            box-shadow: var(--panel-shadow);
+        }
+
+        .status-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent);
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            margin-bottom: 12px;
+        }
+
+        .status-label::before {
+            content: "";
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 0 8px rgba(124, 212, 255, 0.12);
+        }
+
+        .code-sample {
+            margin-top: 12px;
+            padding: 14px;
+            border-radius: 14px 8px 12px 10px;
+            background: rgba(3, 7, 14, 0.8);
+            border: 1px solid rgba(180, 196, 219, 0.14);
+            overflow-x: auto;
+            color: #d8e9ff;
+            font-size: 0.92rem;
+            line-height: 1.6;
+        }
+
+        .section-shell {
+            margin-top: 18px;
+        }
+
+        .section-title {
+            font-size: clamp(1.7rem, 3.8vw, 2.45rem);
+            margin-bottom: 10px;
+        }
+
+        .script-grid {
+            margin-top: 18px;
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 14px;
+        }
+
+        .script-card {
+            grid-column: span 6;
+        }
+
+        .script-card h2 {
+            font-size: 1.05rem;
+            margin-bottom: 8px;
+            color: var(--sun);
+        }
+
+        .script-card ul {
+            margin-top: 10px;
+            padding-left: 20px;
+            display: grid;
+            gap: 8px;
+        }
+
+        .script-links {
+            margin-top: 18px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .site-footer {
+            margin-top: 28px;
+            border-top: 1px solid var(--border);
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            color: var(--muted);
+            font-size: 0.95rem;
+            border-radius: 12px;
+            background: linear-gradient(180deg, rgba(6, 11, 20, 0.28), rgba(6, 11, 20, 0.6));
+        }
+
+        .site-footer a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        @media (max-width: 860px) {
+            .hero {
+                grid-template-columns: 1fr;
+            }
+
+            .script-card {
+                grid-column: span 12;
+            }
+        }
+
+        @media (max-width: 620px) {
+            .top,
+            .site-footer {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Scripts for Solar System</h1>
+    <div class="wrap">
+        <header class="top">
+            <div class="brand">Solar System Script Hub</div>
+            <a class="back-link" href="../index.html#projects">Back to Portfolio</a>
+        </header>
+
+        <section class="hero">
+            <div>
+                <h1>Scripts for the Solar System</h1>
+                <p class="lead">
+                    This page collects the scripts used for the solar-system project and its planets, including the
+                    homepage navigation logic and the cockpit interaction code.
+                </p>
+
+                <div class="hero-actions">
+                    <a class="cta-button" href="solar-system.html">Open Solar System</a>
+                    <a class="secondary-link" href="../js/script.js">View Site Script</a>
+                </div>
+            </div>
+
+            <aside class="status-card" aria-label="Scripts overview">
+                <div class="status-label">Current Scope</div>
+                <p>Use this hub to keep the project scripts organized while the solar-system page remains interactive.</p>
+                <div class="code-sample" aria-label="Script summary">
+                    Navigation: <strong>js/script.js</strong><br />
+                    Solar system cockpit: <strong>sections/solar-system.html</strong><br />
+                    Media assets: <strong>media/videos/Planets</strong> and <strong>media/videos/misc</strong>
+                </div>
+            </aside>
+        </section>
+
+        <section class="section-shell">
+            <h2 class="section-title">What Lives Here</h2>
+            <p class="section-note">
+                The project is split between the shared site script and the solar-system page's embedded interaction code.
+                This page acts as a reference hub so both parts are easy to find from the homepage menu.
+            </p>
+
+            <div class="script-grid">
+                <article class="script-card">
+                    <h2>Shared Site Script</h2>
+                    <p>The shared JavaScript file handles homepage navigation and reusable interactions across the portfolio.</p>
+                    <ul>
+                        <li>Mobile menu toggle</li>
+                        <li>Projects dropdown behavior</li>
+                        <li>Reveal and gallery interactions</li>
+                        <li>Hero video fallback handling</li>
+                    </ul>
+                </article>
+
+                <article class="script-card">
+                    <h2>Solar System Cockpit</h2>
+                    <p>The solar-system page keeps its planet switching logic inline so the video source, labels, and calculations stay next to the layout they control.</p>
+                    <ul>
+                        <li>Planet selection and video swapping</li>
+                        <li>Hyperspace transition timing</li>
+                        <li>Age calculator rendering</li>
+                        <li>Planet data and facts mapping</li>
+                    </ul>
+                </article>
+            </div>
+
+            <div class="script-links">
+                <a class="cta-button" href="solar-system.html#cockpit">Jump to Cockpit</a>
+                <a class="secondary-link" href="solar-system.html#age-calculator">Open Age Calculator</a>
+            </div>
+        </section>
+
+        <footer class="site-footer" aria-label="Page footer">
+            <div>© 2026 Solar System Project — Created by Lancelot</div>
+            <div><a href="../index.html#projects">Back to Portfolio</a> · <a href="mailto:contact@example.com">Contact</a></div>
+        </footer>
+    </div>
 </body>
 </html>
