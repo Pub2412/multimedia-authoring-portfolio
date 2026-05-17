@@ -3,19 +3,21 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Rotoscope Project</title>
+    <title>Michael Jackson Rotoscope Showcase</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Gloria+Hallelujah&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <style>
         :root {
-            --bg: #f4f7fb;
-            --ink: #1b2b3c;
-            --muted: #445769;
-            --accent: #2e587f;
-            --panel: rgba(255, 255, 255, 0.84);
-            --border: rgba(27, 43, 60, 0.4);
-            --shadow: 0 12px 24px rgba(16, 28, 42, 0.15);
+            --bg: #050505;
+            --panel: rgba(11, 11, 12, 0.84);
+            --panel-strong: rgba(18, 18, 20, 0.96);
+            --ink: #f7f1e8;
+            --muted: #d0c0b0;
+            --red: #c81f2d;
+            --gold: #e5bb56;
+            --line: rgba(255, 232, 180, 0.16);
+            --shadow: 0 24px 60px rgba(0, 0, 0, 0.52);
         }
 
         * {
@@ -24,239 +26,756 @@
             padding: 0;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
-            font-family: "Montserrat", sans-serif;
-            color: var(--ink);
-            background: radial-gradient(900px 500px at 20% 15%, rgba(46, 88, 127, 0.16), transparent 62%), linear-gradient(155deg, #f9fbfe, var(--bg));
             min-height: 100vh;
+            color: var(--ink);
+            font-family: "Montserrat", sans-serif;
+            background:
+                radial-gradient(circle at top, rgba(200, 31, 45, 0.34), transparent 28%),
+                radial-gradient(circle at 15% 15%, rgba(229, 187, 86, 0.16), transparent 24%),
+                radial-gradient(circle at 85% 12%, rgba(229, 187, 86, 0.12), transparent 22%),
+                linear-gradient(180deg, #090909 0%, #0f0f11 48%, #050505 100%);
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background:
+                linear-gradient(90deg, transparent 0, transparent 49.5%, rgba(255, 255, 255, 0.03) 50%, transparent 50.5%, transparent 100%),
+                linear-gradient(180deg, transparent 0, transparent 49.5%, rgba(255, 255, 255, 0.03) 50%, transparent 50.5%, transparent 100%);
+            background-size: 88px 88px;
+            mask-image: radial-gradient(circle at center, black 30%, transparent 100%);
+            opacity: 0.38;
         }
 
         .wrap {
-            max-width: 1000px;
+            position: relative;
+            z-index: 1;
+            max-width: 1180px;
             margin: 0 auto;
-            padding: 28px 20px 48px;
+            padding: 28px 18px 40px;
         }
 
         .top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 28px;
+            gap: 14px;
+            margin-bottom: 18px;
         }
 
         .brand {
-            font-family: "Gloria Hallelujah", cursive;
-            font-size: clamp(1.5rem, 4vw, 2.2rem);
+            font-family: "Bebas Neue", sans-serif;
+            font-size: clamp(1.7rem, 4vw, 2.5rem);
+            letter-spacing: 0.12em;
+            color: var(--gold);
+            text-transform: uppercase;
         }
 
         .back-link {
             text-decoration: none;
             color: var(--ink);
-            border: 1px solid var(--ink);
-            border-radius: 14px 6px 12px 8px;
-            padding: 9px 12px;
+            border: 1px solid rgba(229, 187, 86, 0.5);
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 999px;
+            padding: 10px 15px;
             font-weight: 700;
-            background: rgba(255, 255, 255, 0.8);
+            letter-spacing: 0.03em;
+            transition: 0.2s ease;
+        }
+
+        .back-link:hover {
+            transform: translateY(-1px);
+            background: rgba(200, 31, 45, 0.16);
+            border-color: rgba(200, 31, 45, 0.6);
         }
 
         .hero {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(180deg, rgba(20, 20, 24, 0.94), rgba(8, 8, 9, 0.96));
+            border: 1px solid rgba(229, 187, 86, 0.24);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            padding: clamp(22px, 3vw, 34px);
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: -20% auto auto -12%;
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(200, 31, 45, 0.28), transparent 65%);
+            filter: blur(6px);
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            inset: auto -12% -24% auto;
+            width: 360px;
+            height: 360px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(229, 187, 86, 0.2), transparent 62%);
+            filter: blur(10px);
+        }
+
+        .hero-grid {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+            gap: 24px;
+            align-items: center;
+        }
+
+        .hero-copy h1 {
+            font-family: "Bebas Neue", sans-serif;
+            font-size: clamp(3rem, 7vw, 5.8rem);
+            line-height: 0.9;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+
+        .hero-copy .lead {
+            color: var(--muted);
+            line-height: 1.75;
+            max-width: 62ch;
+            margin-bottom: 18px;
+        }
+
+        .badge-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(229, 187, 86, 0.22);
+            background: rgba(255, 255, 255, 0.04);
+            color: #f6e9d2;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .hero-note {
+            display: grid;
+            gap: 10px;
+            padding: 18px;
+            border-radius: 22px;
+            background: linear-gradient(180deg, rgba(229, 187, 86, 0.08), rgba(255, 255, 255, 0.03));
+            border: 1px solid rgba(229, 187, 86, 0.16);
+        }
+
+        .hero-note strong {
+            font-family: "Bebas Neue", sans-serif;
+            letter-spacing: 0.08em;
+            font-size: 1.4rem;
+            color: var(--gold);
+        }
+
+        .hero-note p {
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .section-shell {
+            margin-top: 22px;
             background: var(--panel);
-            border: 2px solid var(--border);
-            border-radius: 20px 8px 16px 12px;
+            border: 1px solid rgba(229, 187, 86, 0.18);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            padding: clamp(18px, 2.4vw, 26px);
+        }
+
+        .section-title {
+            font-family: "Bebas Neue", sans-serif;
+            font-size: clamp(2rem, 4vw, 3rem);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 8px;
+        }
+
+        .section-copy {
+            color: var(--muted);
+            line-height: 1.65;
+            max-width: 70ch;
+            margin-bottom: 16px;
+        }
+
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 18px;
+        }
+
+        .media-card {
+            grid-column: span 6;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 22px;
+            padding: 18px;
+        }
+
+        .media-card h3 {
+            font-family: "Bebas Neue", sans-serif;
+            font-size: 1.8rem;
+            letter-spacing: 0.08em;
+            margin-bottom: 10px;
+            color: #fff1d0;
+        }
+
+        .media-card p {
+            color: var(--muted);
+            line-height: 1.6;
+            margin-bottom: 14px;
+        }
+
+        .video-shell,
+        .iframe-shell {
+            position: relative;
+            overflow: hidden;
+            border-radius: 18px;
+            border: 1px solid rgba(229, 187, 86, 0.24);
+            background: #090909;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .video-shell video,
+        .iframe-shell iframe {
+            display: block;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border: 0;
+            background: #050505;
+        }
+
+        .control-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .btn {
+            border: 1px solid rgba(229, 187, 86, 0.4);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--ink);
+            padding: 10px 14px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            transition: 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            background: rgba(200, 31, 45, 0.18);
+            border-color: rgba(200, 31, 45, 0.6);
+        }
+
+        .status {
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        .comparison-stage {
+            position: relative;
+            overflow: hidden;
+            border-radius: 24px;
+            border: 1px solid rgba(229, 187, 86, 0.24);
+            background: #090909;
+            min-height: 360px;
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+            --split: 50%;
+        }
+
+        .comparison-layer {
+            position: absolute;
+            inset: 0;
+        }
+
+        .comparison-layer--left {
+            overflow: hidden;
+            clip-path: inset(0 calc(100% - var(--split)) 0 0);
+        }
+
+        .comparison-layer--right {
+            overflow: hidden;
+            clip-path: inset(0 0 0 var(--split));
+        }
+
+        .comparison-layer video,
+        .comparison-layer iframe {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border: 0;
+            display: block;
+            background: #050505;
+        }
+
+        .comparison-label {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            z-index: 2;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            font-size: 0.8rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .comparison-label.right {
+            left: auto;
+            right: 14px;
+        }
+
+        .comparison-handle {
+            position: absolute;
+            top: 0;
+            left: calc(var(--split) - 1px);
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(180deg, transparent, rgba(229, 187, 86, 0.8), transparent);
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        .comparison-handle::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.78);
+            border: 1px solid rgba(229, 187, 86, 0.45);
+            box-shadow: 0 0 0 10px rgba(229, 187, 86, 0.08);
+        }
+
+        .comparison-handle::after {
+            content: "⇆";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--gold);
+            font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: 0.12em;
+        }
+
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .slider-row input {
+            flex: 1;
+            accent-color: var(--red);
+        }
+
+        /* Custom controls for the featured edited rotoscope video */
+        .custom-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 12px;
+        }
+
+        .custom-controls input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 6px;
+            flex: 1;
+        }
+
+        .custom-controls input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--gold);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+        }
+
+        .slider-row .slider-readout {
+            min-width: 84px;
+            text-align: right;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        .album-layout {
+            display: grid;
+            grid-template-columns: minmax(280px, 1fr) minmax(0, 1.1fr);
+            gap: 18px;
+            align-items: stretch;
+        }
+
+        .album-art {
+            position: relative;
+            min-height: 420px;
+            border-radius: 28px;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 50% 38%, rgba(255, 255, 255, 0.2), transparent 17%),
+                linear-gradient(145deg, #0a0a0a 0%, #161616 46%, #0c0c0c 100%);
+            border: 1px solid rgba(229, 187, 86, 0.24);
             box-shadow: var(--shadow);
             padding: 24px;
         }
 
-        h1 {
-            font-family: "Gloria Hallelujah", cursive;
-            font-size: clamp(2rem, 5vw, 3.3rem);
-            margin-bottom: 12px;
-            line-height: 1.05;
+        .album-art::before {
+            content: "THRILLER";
+            position: absolute;
+            inset: 20px auto auto 22px;
+            font-family: "Bebas Neue", sans-serif;
+            letter-spacing: 0.18em;
+            font-size: 2rem;
+            color: var(--gold);
         }
 
-        .lead {
-            color: var(--muted);
-            max-width: 65ch;
-            line-height: 1.6;
-            margin-bottom: 18px;
+        .album-art::after {
+            content: "";
+            position: absolute;
+            inset: auto 22px 22px auto;
+            width: 110px;
+            height: 6px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, transparent, rgba(229, 187, 86, 0.85), transparent);
         }
 
-        .hero-video-wrap {
-            width: min(360px, 100%);
-            border: 2px solid var(--border);
-            border-radius: 18px 8px 16px 10px;
+        .album-cover {
+            position: absolute;
+            left: 24px;
+            bottom: 24px;
+            width: min(54%, 220px);
+            aspect-ratio: 1 / 1;
+            border-radius: 20px;
             overflow: hidden;
-            background: rgba(241, 246, 252, 0.65);
-            box-shadow: var(--shadow);
-            margin: 0 0 18px;
-            transform: rotate(-0.5deg);
+            border: 1px solid rgba(229, 187, 86, 0.4);
+            background:
+                radial-gradient(circle at 50% 28%, rgba(255, 255, 255, 0.25), transparent 18%),
+                linear-gradient(180deg, rgba(200, 31, 45, 0.88), rgba(18, 18, 18, 0.96));
+            box-shadow: 0 14px 36px rgba(0, 0, 0, 0.4);
         }
 
-        .hero-video-title {
-            font-size: 1.1rem;
+        .album-cover .silhouette {
+            position: absolute;
+            inset: 17% 20% 18% 20%;
+            border-radius: 18px;
+            background:
+                radial-gradient(circle at 50% 18%, #f5e2c4 0 8%, transparent 8.1%),
+                radial-gradient(circle at 43% 40%, #f5e2c4 0 8%, transparent 8.1%),
+                linear-gradient(180deg, transparent 0 26%, #f5e2c4 26% 32%, transparent 32% 38%, #f5e2c4 38% 44%, transparent 44% 52%, #f5e2c4 52% 60%, transparent 60% 100%);
+            clip-path: polygon(48% 0%, 62% 6%, 73% 20%, 74% 34%, 66% 46%, 67% 63%, 78% 84%, 78% 100%, 22% 100%, 22% 84%, 33% 63%, 33% 46%, 25% 34%, 26% 20%, 37% 6%);
+            transform: translateY(12px);
+            filter: drop-shadow(0 0 12px rgba(0, 0, 0, 0.5));
+        }
+
+        .disc {
+            position: absolute;
+            right: 28px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: min(54%, 230px);
+            aspect-ratio: 1 / 1;
+            border-radius: 50%;
+            background:
+                radial-gradient(circle at center, #1b1b1b 0 14%, #f2dfac 14% 17%, #171717 17% 24%, rgba(255, 255, 255, 0.08) 24% 25%, #0b0b0b 25% 100%),
+                conic-gradient(from 0deg, #b11f29, #f0c862, #b11f29, #8d1f26, #f0c862, #b11f29);
+            box-shadow: inset 0 0 0 16px rgba(255, 255, 255, 0.03), 0 18px 38px rgba(0, 0, 0, 0.42);
+        }
+
+        .disc::before {
+            content: "";
+            position: absolute;
+            inset: 14px;
+            border-radius: 50%;
+            background: repeating-conic-gradient(from 0deg, rgba(255, 255, 255, 0.12) 0 8deg, transparent 8deg 16deg);
+            mask: radial-gradient(circle at center, transparent 0 52%, black 52% 100%);
+            opacity: 0.6;
+        }
+
+        .disc::after {
+            content: "BILLIE JEAN";
+            position: absolute;
+            inset: 50% auto auto 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            text-align: center;
+            padding: 10px;
+            font-family: "Bebas Neue", sans-serif;
+            font-size: 1rem;
+            letter-spacing: 0.12em;
+            line-height: 1.1;
+            color: #f4dfb8;
+            background: radial-gradient(circle, #1d1d1d 0 47%, #f4dfb8 47% 49%, #151515 49% 100%);
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.08);
+        }
+
+        .lyrics-card {
+            display: grid;
+            gap: 14px;
+        }
+
+        .lyrics-panel {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 22px;
+            padding: 20px;
+        }
+
+        .lyrics-panel h3 {
+            font-family: "Bebas Neue", sans-serif;
+            font-size: 1.9rem;
+            letter-spacing: 0.08em;
+            color: #fff1d0;
             margin-bottom: 10px;
-            color: var(--ink);
-            font-family: "Gloria Hallelujah", cursive;
         }
 
-        .hero-video {
+        .lyrics-note {
+            color: var(--muted);
+            line-height: 1.65;
+            margin-bottom: 12px;
+        }
+
+        .lyrics-box {
+            min-height: 220px;
+            padding: 18px;
+            border-radius: 18px;
+            border: 1px dashed rgba(229, 187, 86, 0.3);
+            background: rgba(0, 0, 0, 0.28);
+            color: #f0e3cd;
+            line-height: 1.8;
+            white-space: pre-line;
+        }
+
+        .progress-summary {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            padding: 16px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .progress-summary .label {
+            font-family: "Bebas Neue", sans-serif;
+            letter-spacing: 0.08em;
+            font-size: 1.35rem;
+            color: var(--gold);
+        }
+
+        .progress-summary .meta {
+            color: var(--muted);
+        }
+
+        .overall-bar {
+            width: min(100%, 320px);
+            height: 12px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(229, 187, 86, 0.18);
+        }
+
+        .overall-bar span {
+            display: block;
+            height: 100%;
+            width: 0;
+            border-radius: inherit;
+            background: linear-gradient(90deg, var(--red), var(--gold));
+        }
+
+        .weeks-grid {
+            display: grid;
+            grid-template-columns: repeat(12, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .week-card {
+            grid-column: span 4;
+            padding: 16px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .week-card.featured {
+            background: linear-gradient(180deg, rgba(200, 31, 45, 0.12), rgba(255, 255, 255, 0.04));
+            border-color: rgba(200, 31, 45, 0.26);
+        }
+
+        .week-head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .week-head strong {
+            font-family: "Bebas Neue", sans-serif;
+            font-size: 1.5rem;
+            letter-spacing: 0.08em;
+            color: #fff1d0;
+        }
+
+        .week-head span {
+            color: var(--gold);
+            font-size: 0.9rem;
+        }
+
+        .week-card p {
+            color: var(--muted);
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .week-media {
+            margin-top: 12px;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid rgba(229, 187, 86, 0.2);
+            background: #090909;
+        }
+
+        .week-media video {
             display: block;
             width: 100%;
             aspect-ratio: 16 / 9;
             object-fit: cover;
-            background: #111924;
-            height: auto;
-            filter: grayscale(1) contrast(1.1) brightness(0.95);
+            background: #050505;
         }
 
-        .hero-video-controls {
-            display: flex;
-            justify-content: flex-end;
-            padding: 10px;
-            background: rgba(235, 241, 248, 0.85);
+        .week-meter {
+            margin-top: 12px;
+            height: 10px;
+            border-radius: 999px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.08);
         }
 
-        .video-mute-btn {
-            border: 1px solid var(--ink);
-            background: rgba(241, 246, 252, 0.95);
-            color: var(--ink);
-            padding: 8px 12px;
-            border-radius: 12px 6px 10px 8px;
-            cursor: pointer;
-            font-family: "Montserrat", sans-serif;
-            font-weight: 700;
-            transition: 0.2s ease;
+        .week-meter span {
+            display: block;
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, var(--red), var(--gold));
         }
 
-        .video-mute-btn:hover {
-            background: #2d4460;
-            color: #eef4fc;
-            transform: rotate(-2deg);
-        }
-
-        .video-status {
-            font-size: 0.85rem;
-            color: var(--muted);
-            margin-bottom: 12px;
-        }
-
-        .cards {
-            margin-top: 24px;
+        .youtube-fallback {
             display: grid;
-            grid-template-columns: repeat(12, 1fr);
-            gap: 14px;
-        }
-
-        .card {
-            grid-column: span 6;
-            background: rgba(255, 255, 255, 0.9);
-            border: 1px solid var(--border);
-            border-radius: 16px 8px 12px 10px;
-            padding: 16px;
-        }
-
-        .card h2 {
-            font-size: 1.15rem;
-            margin-bottom: 8px;
-        }
-
-        .card p {
+            place-items: center;
+            gap: 10px;
+            min-height: 100%;
+            padding: 20px;
+            text-align: center;
             color: var(--muted);
-            line-height: 1.5;
+            background: linear-gradient(180deg, rgba(10, 10, 10, 0.92), rgba(24, 24, 24, 0.96));
         }
 
-        .steps {
+        .youtube-fallback strong {
+            color: var(--gold);
+            font-family: "Bebas Neue", sans-serif;
+            font-size: 1.6rem;
+            letter-spacing: 0.1em;
+        }
+
+        .footer {
             margin-top: 20px;
-            padding-left: 20px;
-        }
-
-        .steps li {
-            margin-bottom: 8px;
-            line-height: 1.5;
+            padding: 18px;
+            text-align: center;
+            font-family: "Bebas Neue", sans-serif;
+            font-size: 1.5rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--gold);
+            border-top: 1px solid rgba(229, 187, 86, 0.18);
         }
 
         .progress-section {
-            margin-top: 24px;
-            padding: 18px;
-            background: rgba(255, 255, 255, 0.9);
-            border: 1px solid var(--border);
-            border-radius: 16px 8px 12px 10px;
+            margin-top: 22px;
         }
 
-        .progress-title {
-            font-size: 1.2rem;
-            margin-bottom: 8px;
-        }
+        @media (max-width: 980px) {
+            .hero-grid,
+            .album-layout {
+                grid-template-columns: 1fr;
+            }
 
-        .progress-note {
-            color: var(--muted);
-            margin-bottom: 12px;
-            line-height: 1.5;
-        }
-
-        .progress-video-wrap {
-            width: min(560px, 100%);
-            border: 2px solid var(--border);
-            border-radius: 14px 6px 12px 8px;
-            overflow: hidden;
-            background: rgba(241, 246, 252, 0.65);
-        }
-
-        .progress-video {
-            display: block;
-            width: 100%;
-            height: auto;
-            background: #111924;
-        }
-
-        .progress-controls {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px;
-            background: rgba(235, 241, 248, 0.9);
-            border-top: 1px solid var(--border);
-            flex-wrap: wrap;
-        }
-
-        .progress-btn {
-            border: 1px solid var(--ink);
-            background: rgba(241, 246, 252, 0.95);
-            color: var(--ink);
-            padding: 6px 10px;
-            border-radius: 10px 5px 8px 6px;
-            cursor: pointer;
-            font-family: "Montserrat", sans-serif;
-            font-weight: 700;
-            transition: 0.2s ease;
-        }
-
-        .progress-btn:hover {
-            background: #2d4460;
-            color: #eef4fc;
-        }
-
-        .progress-seek {
-            flex: 1;
-            min-width: 150px;
-            accent-color: #2d4460;
-        }
-
-        .progress-time {
-            font-size: 0.85rem;
-            color: var(--muted);
-            min-width: 78px;
-            text-align: right;
-        }
-
-        @media (max-width: 760px) {
-            .card {
+            .media-card,
+            .week-card {
                 grid-column: span 12;
             }
 
+            .album-art {
+                min-height: 360px;
+            }
+        }
+
+        @media (max-width: 720px) {
             .top {
-                flex-wrap: wrap;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .hero-copy h1 {
+                font-size: clamp(2.6rem, 16vw, 4.5rem);
+            }
+
+            .comparison-stage {
+                min-height: 260px;
+            }
+
+            .slider-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .slider-row .slider-readout {
+                min-width: 0;
+                text-align: left;
             }
         }
     </style>
@@ -264,266 +783,429 @@
 <body>
     <div class="wrap">
         <header class="top">
-            <div class="brand">Rotoscope Animation Project</div>
+            <div class="brand">Michael Jackson Rotoscope</div>
             <a class="back-link" href="../index.html#projects">Back to Portfolio</a>
         </header>
 
-        <section class="hero">
-            <h1>Take on Me: Reimagined</h1>
-            <br>
-            <p class="lead">
-                This section presents a concept website for a rotoscope project, covering planning, frame extraction,
-                tracing workflow, and final compositing. The objective is to preserve realistic motion while introducing
-                a stylized visual language.
+        <section class="hero" aria-labelledby="hero-title">
+            <div class="hero-grid">
+                <div class="hero-copy">
+                    <h1 id="hero-title">Billie Jean in Motion</h1>
+                    <p class="lead">
+                        A Michael Jackson inspired presentation built around the rotoscope workflow, the banner
+                        footage, a YouTube edited cut, a live comparison slider, a Thriller-style album display,
+                        and a 12-week production timeline.
+                    </p>
+                    <div class="badge-row" aria-label="Project highlights">
+                        <span class="badge">Rotoscope Study</span>
+                        <span class="badge">Michael Jackson Style</span>
+                        <span class="badge">Thriller Visuals</span>
+                        <span class="badge">Billie Jean Theme</span>
+                    </div>
+                </div>
+                <div class="hero-note">
+                    <strong>Stage lighting. Strong contrast. Performance energy.</strong>
+                    <p>
+                        The page uses a black, red, and gold concert look to match the performance vibe while keeping
+                        the workflow sections readable on desktop and mobile.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-shell" aria-labelledby="media-showcase-title">
+            <h2 class="section-title" id="media-showcase-title">Featured Videos</h2>
+            <p class="section-copy">
+                The banner footage is shown separately from the edited rotoscope cut. The second panel now plays the
+                local <strong>BJ.mp4</strong> file directly inside the page.
             </p>
 
-            <h2 class="hero-video-title">Sample Actor for Rotoscope</h2>
-            <figure class="hero-video-wrap">
-                <video id="heroVideo" class="hero-video" autoplay muted loop playsinline preload="auto" width="360" height="204" style="width:100%;max-width:360px;height:204px;object-fit:cover;" aria-label="Homepage banner video">
-                    <source id="heroVideoSource" src="../media/videos/bannervideo.mp4" type="video/mp4" />
-                    Your browser cannot play this video format.
-                </video>
-                <figcaption class="hero-video-controls">
-                    <button id="heroMuteToggle" class="video-mute-btn" type="button" aria-pressed="false">Mute Video</button>
-                </figcaption>
-            </figure>
-            <p id="heroVideoStatus" class="video-status" hidden>Video could not be loaded here. The clip is display-only.</p>
-            <p><i>Videos are used for Educational Purposes Only</i></p>
-
-            <div class="cards">
-                <article class="card">
-                    <h2>Project Goal</h2>
-                    <p>Create a short animation sequence with realistic movement and hand-drawn artistic expression.</p>
+            <div class="media-grid">
+                <article class="media-card">
+                    <h3>Banner Video</h3>
+                    <p>Local source from media/videos/bannervideo.mp4 with basic playback controls.</p>
+                    <figure class="video-shell">
+                        <video id="bannerVideo" autoplay muted loop playsinline preload="auto" aria-label="Banner video">
+                            <source src="../media/videos/bannervideo.mp4" type="video/mp4" />
+                            Your browser cannot play this video format.
+                        </video>
+                    </figure>
+                    <div class="control-row">
+                        <button id="bannerMuteToggle" class="btn" type="button" aria-pressed="false">Mute Video</button>
+                        <span id="bannerStatus" class="status">Autoplay enabled, muted by default.</span>
+                    </div>
                 </article>
-                <article class="card">
-                    <h2>Main Tools</h2>
-                    <p>Adobe Premiere Pro, CLIPART STUDIO, and timeline-based compositing for output refinement.</p>
+
+                <article class="media-card">
+                    <h3>Edited Rotoscope Video</h3>
+                    <p>
+                        This player uses the local edited file so it plays on the website itself without leaving the
+                        page.
+                    </p>
+                    <figure class="video-shell">
+                        <video id="rotoscopeVideo" preload="metadata" playsinline aria-label="Edited rotoscope video">
+                            <source src="../media/videos/BJ.mp4" type="video/mp4" />
+                            Your browser cannot play this video format.
+                        </video>
+                    </figure>
+                    <div id="rotoscopeControlsWrap">
+                        <div class="custom-controls" id="rotoscopeControls" aria-label="Edited video controls">
+                            <button id="rotPlay" class="btn" type="button" aria-pressed="false">Play</button>
+                            <input id="rotProgress" type="range" min="0" max="0" value="0" aria-label="Seek" />
+                            <span id="rotTime" class="status">0:00 / 0:00</span>
+                            <input id="rotVolume" type="range" min="0" max="1" step="0.05" value="1" aria-label="Volume" style="width:110px;" />
+                            <button id="rotFS" class="btn" type="button" aria-label="Toggle fullscreen">⤢</button>
+                        </div>
+                        <div class="control-row">
+                            <span id="rotoscopeStatus" class="status">Local BJ.mp4 video loaded for inline playback.</span>
+                        </div>
+                    </div>
                 </article>
             </div>
-            <br>
-        
-            <h2>Procedures:</h2>
-            <ol class="steps">
-                <li>Record or select reference footage with stable movement.</li>
-                <li>Break footage into key frames and define frame rate targets.</li>
-                <li>Trace and stylize each frame while preserving motion continuity.</li>
-                <li>Composite all frames, apply color treatment, and render final sequence.</li>
-            </ol>
-
-            <section class="progress-section" aria-labelledby="weekly-progress-title-week1">
-                <h2 id="weekly-progress-title-week1" class="progress-title">Rotoscope Weekly Progress</h2>
-                <p class="progress-note">Week 1 and 2 progress video:</p>
-                <figure class="progress-video-wrap">
-                    <video id="progressVideoWeek1" class="progress-video" preload="metadata" width="560" height="315" aria-label="Rotoscope Week 1 progress video">
-                        <source src="../media/videos/ProgressRoto/WEEK1.mp4" type="video/mp4" />
-                        Your browser cannot play this video format.
-                    </video>
-                    <figcaption class="progress-controls">
-                        <button id="progressPlayToggleWeek1" class="progress-btn" type="button" aria-pressed="false">Play</button>
-                        <button id="progressMuteToggleWeek1" class="progress-btn" type="button" aria-pressed="false">Mute</button>
-                        <input id="progressSeekWeek1" class="progress-seek" type="range" min="0" max="100" value="0" step="0.1" aria-label="Seek week 1 video timeline" />
-                        <span id="progressTimeWeek1" class="progress-time">0:00 / 0:00</span>
-                    </figcaption>
-                </figure>
-                <ol class="steps" style="margin-top: 8px;">
-                    <i><h3 style="font-size: 1rem; margin-top: 16px; margin-bottom: 8px;">Week 1-2 Tasks:</h3></i>
-                    <li>Select and record reference footage with stable camera movement.</li>
-                    <li>Extract key frames from source video at target frame rate.</li>
-                    <li>Create initial rotoscope composition structure and layer organization.</li>
-                    <li>Begin tracing first sequence of frames with hand-drawn elements.</li>
-                </ol>
-            </section>
-            <br>
-            <section class="progress-section" aria-labelledby="weekly-progress-title-week3">
-                <h2 id="weekly-progress-title-week3" class="progress-title">Rotoscope Weekly Progress</h2>
-                <p class="progress-note">Week 3 progress video:</p>
-                <figure class="progress-video-wrap">
-                    <video id="progressVideoWeek3" class="progress-video" preload="metadata" width="560" height="315" aria-label="Rotoscope Week 3 progress video">
-                        <source src="../media/videos/ProgressRoto/WEEK3.mp4" type="video/mp4" />
-                        Your browser cannot play this video format.
-                    </video>
-                    <figcaption class="progress-controls">
-                        <button id="progressPlayToggleWeek3" class="progress-btn" type="button" aria-pressed="false">Play</button>
-                        <button id="progressMuteToggleWeek3" class="progress-btn" type="button" aria-pressed="false">Mute</button>
-                        <input id="progressSeekWeek3" class="progress-seek" type="range" min="0" max="100" value="0" step="0.1" aria-label="Seek week 3 video timeline" />
-                        <span id="progressTimeWeek3" class="progress-time">0:00 / 0:00</span>
-                    </figcaption>
-                </figure>
-                <ol class="steps" style="margin-top: 8px;">
-                    <i><h3 style="font-size: 1rem; margin-top: 16px; margin-bottom: 8px;">Week 3 Tasks:</h3></i>
-                    <li>Continue tracing remaining frames with refined linework and details.</li>
-                    <li>Apply color treatment and stylization to completed sequences.</li>
-                    <li>Composite all traced elements with original footage alignment.</li>
-                    <li>Review and refine motion continuity between frame transitions.</li>
-                </ol>
-            </section>
-            <br>
-            <section class="progress-section" aria-labelledby="weekly-progress-title-week5">
-                <h2 id="weekly-progress-title-week5" class="progress-title">Rotoscope Weekly Progress</h2>
-                <p class="progress-note">Week 4 and 5 progress video:</p>
-                <figure class="progress-video-wrap">
-                    <video id="progressVideoWeek5" class="progress-video" preload="metadata" width="560" height="315" aria-label="Rotoscope Week 5 progress video">
-                        <source src="../media/videos/ProgressRoto/WEEK5.mp4" type="video/mp4" />
-                        Your browser cannot play this video format.
-                    </video>
-                    <figcaption class="progress-controls">
-                        <button id="progressPlayToggleWeek5" class="progress-btn" type="button" aria-pressed="false">Play</button>
-                        <button id="progressMuteToggleWeek5" class="progress-btn" type="button" aria-pressed="false">Mute</button>
-                        <input id="progressSeekWeek5" class="progress-seek" type="range" min="0" max="100" value="0" step="0.1" aria-label="Seek week 5 video timeline" />
-                        <span id="progressTimeWeek5" class="progress-time">0:00 / 0:00</span>
-                    </figcaption>
-                </figure>
-                <ol class="steps" style="margin-top: 8px;">
-                    <i><h3 style="font-size: 1rem; margin-top: 16px; margin-bottom: 8px;">Week 4-5 Tasks:</h3></i>
-                    <li>Continue refining traced frames for consistent visual style.</li>
-                    <li>Polish compositing, timing, and layer transitions.</li>
-                    <li>Apply final color corrections and visual cleanup.</li>
-                    <li>Prepare the sequence for final export and presentation.</li>
-                </ol>
-            </section>
         </section>
+
+        <section class="section-shell" aria-labelledby="comparison-title">
+            <h2 class="section-title" id="comparison-title">Comparison Slider</h2>
+            <p class="section-copy">
+                Slide between the banner clip and the edited rotoscope view to compare the two treatments.
+            </p>
+
+            <div class="comparison-stage" id="comparisonStage">
+                <div class="comparison-label">Banner</div>
+                <div class="comparison-label right">Rotoscope</div>
+
+                <div class="comparison-layer comparison-layer--left">
+                    <video id="compareBannerVideo" controls autoplay muted loop playsinline preload="auto" aria-label="Comparison banner video">
+                        <source src="../media/videos/bannervideo.mp4" type="video/mp4" />
+                        Your browser cannot play this video format.
+                    </video>
+                </div>
+
+                <div class="comparison-layer comparison-layer--right">
+                    <video id="compareRotoscopeVideo" controls autoplay muted loop playsinline preload="auto" aria-label="Comparison rotoscope video">
+                        <source src="../media/videos/BJ.mp4" type="video/mp4" />
+                        Your browser cannot play this video format.
+                    </video>
+                </div>
+
+                <div class="comparison-handle" aria-hidden="true"></div>
+            </div>
+
+            <div class="slider-row">
+                <input id="comparisonRange" type="range" min="0" max="100" value="50" aria-label="Comparison slider" />
+                <span id="comparisonReadout" class="slider-readout">50% / 50%</span>
+            </div>
+
+            <div class="control-row" id="comparisonControls">
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <button id="compPlay" class="btn" type="button">Play Both</button>
+                    <button id="compPause" class="btn" type="button">Pause Both</button>
+                    <label style="display:flex;align-items:center;gap:6px;color:var(--muted);"><input id="compSync" type="checkbox" /> Sync</label>
+                    <label style="display:flex;align-items:center;gap:6px;color:var(--muted);"><input id="compMute" type="checkbox" /> Mute</label>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;flex:1;margin-left:auto;">
+                    <input id="compSeek" type="range" min="0" max="0" value="0" style="flex:1;" />
+                    <span id="compTime" class="status">0:00 / 0:00</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-shell" aria-labelledby="album-title">
+            <h2 class="section-title" id="album-title">Thriller / Billie Jean</h2>
+            <p class="section-copy">
+                The album cover and disc are recreated in CSS so the page keeps the same concert-style direction without
+                relying on extra image files.
+            </p>
+
+            <div class="album-layout">
+                <div class="album-art" aria-label="Thriller inspired album art and disc">
+                    <div class="album-cover">
+                        <div class="silhouette"></div>
+                    </div>
+                    <div class="disc"></div>
+                </div>
+
+                <div class="lyrics-card">
+                    <div class="lyrics-panel">
+                        <h3>Billie Jean Lyrics</h3>
+                        <p class="lyrics-note">
+                            I can’t reproduce the full lyrics here, but I can show a short excerpt and keep the rest as
+                            an on-page note.
+                        </p>
+                        <div class="lyrics-box">
+                            Billie Jean is not my lover.
+
+                            The full song text is omitted here due to copyright.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-shell progress-section" aria-labelledby="progress-title">
+            <h2 class="section-title" id="progress-title">Weekly Progress</h2>
+            <p class="section-copy">
+                A 12-week progress map showing the build from early reference work to the final composite.
+            </p>
+
+            <div class="progress-summary">
+                <div>
+                    <div class="label">Production Timeline</div>
+                    <div class="meta">Week 1 through Week 12</div>
+                </div>
+                <div class="overall-bar" aria-hidden="true"><span id="overallProgressBar"></span></div>
+                <div class="meta" id="overallProgressText">Overall progress: 0%</div>
+            </div>
+
+            <div id="weeksGrid" class="weeks-grid"></div>
+        </section>
+
+        <footer class="footer">EDUCATIONAL PURPOSES ONLY</footer>
     </div>
 
     <script>
-        const heroVideo = document.getElementById("heroVideo");
-        const heroMuteToggle = document.getElementById("heroMuteToggle");
-        const heroVideoSource = document.getElementById("heroVideoSource");
-        const heroVideoStatus = document.getElementById("heroVideoStatus");
+        const bannerVideo = document.getElementById("bannerVideo");
+        const compareBannerVideo = document.getElementById("compareBannerVideo");
+        const rotoscopeVideo = document.getElementById("rotoscopeVideo");
+        const compareRotoscopeVideo = document.getElementById("compareRotoscopeVideo");
+        const rotoscopeStatus = document.getElementById("rotoscopeStatus");
+        const comparisonStage = document.getElementById("comparisonStage");
+        const comparisonRange = document.getElementById("comparisonRange");
+        const comparisonReadout = document.getElementById("comparisonReadout");
+        const weeksGrid = document.getElementById("weeksGrid");
+        const overallProgressBar = document.getElementById("overallProgressBar");
+        const overallProgressText = document.getElementById("overallProgressText");
 
-        if (heroVideo && heroMuteToggle) {
-            const sourceCandidates = [
-                "../media/videos/bannervideo.mp4",
-                "../media/videos/BannerVideo.mp4"
-            ];
-            let currentSourceIndex = 0;
+        if (rotoscopeStatus) {
+            rotoscopeStatus.textContent = rotoscopeVideo
+                ? "Local BJ.mp4 video loaded for inline playback."
+                : "Edited video player could not be initialized.";
+        }
 
-            const updateMuteButton = () => {
-                const muted = heroVideo.muted;
-                heroMuteToggle.textContent = muted ? "Unmute Video" : "Mute Video";
-                heroMuteToggle.setAttribute("aria-pressed", String(!muted));
-            };
-
-            const setVideoSource = (index) => {
-                if (!heroVideoSource) return;
-                heroVideoSource.src = sourceCandidates[index];
-                heroVideo.load();
-            };
-
-            const tryAutoplayMuted = async () => {
-                heroVideo.muted = true;
-                try {
-                    await heroVideo.play();
-                } catch (error) {
-                    // Ignore if autoplay is blocked until user interaction.
-                }
-                updateMuteButton();
-            };
-
-            if (heroVideoSource) {
-                heroVideoSource.addEventListener("error", () => {
-                    currentSourceIndex += 1;
-                    if (currentSourceIndex < sourceCandidates.length) {
-                        setVideoSource(currentSourceIndex);
-                        tryAutoplayMuted();
-                        return;
-                    }
-
-                    if (heroVideoStatus) {
-                        heroVideoStatus.hidden = false;
-                    }
-                });
-            }
-
-            tryAutoplayMuted();
-
-            heroMuteToggle.addEventListener("click", async () => {
-                heroVideo.muted = !heroVideo.muted;
-                if (heroVideo.paused) {
-                    try {
-                        await heroVideo.play();
-                    } catch (error) {
-                        // Ignore play rejection and keep current state.
-                    }
-                }
-                updateMuteButton();
+        if (bannerVideo) {
+            bannerVideo.muted = true;
+            bannerVideo.play().catch(() => {
+                // Ignore autoplay rejection; controls remain available.
             });
         }
 
-        const setupProgressVideo = (weekSuffix) => {
-            const progressVideo = document. getElementById(`progressVideo${weekSuffix}`);
-            const progressPlayToggle = document.getElementById(`progressPlayToggle${weekSuffix}`);
-            const progressMuteToggle = document.getElementById(`progressMuteToggle${weekSuffix}`);
-            const progressSeek = document.getElementById(`progressSeek${weekSuffix}`);
-            const progressTime = document.getElementById(`progressTime${weekSuffix}`);
+        if (rotoscopeVideo) {
+            rotoscopeVideo.pause();
+            rotoscopeVideo.currentTime = 0;
+        }
 
-            if (progressVideo && progressPlayToggle && progressMuteToggle && progressSeek && progressTime) {
-                const formatTime = (time) => {
-                    if (!Number.isFinite(time) || time < 0) return "0:00";
-                    const total = Math.floor(time);
-                    const mins = Math.floor(total / 60);
-                    const secs = String(total % 60).padStart(2, "0");
-                    return `${mins}:${secs}`;
-                };
+        const comparisonSync = () => {
+            const value = Number(comparisonRange.value);
+            const split = `${value}%`;
+            comparisonStage.style.setProperty("--split", split);
+            comparisonReadout.textContent = `${value}% / ${100 - value}%`;
+        };
 
-                const updatePlayButton = () => {
-                    const isPlaying = !progressVideo.paused && !progressVideo.ended;
-                    progressPlayToggle.textContent = isPlaying ? "Pause" : "Play";
-                    progressPlayToggle.setAttribute("aria-pressed", String(isPlaying));
-                };
+        comparisonRange.addEventListener("input", comparisonSync);
+        comparisonSync();
 
-                const updateMuteButton = () => {
-                    progressMuteToggle.textContent = progressVideo.muted ? "Unmute" : "Mute";
-                    progressMuteToggle.setAttribute("aria-pressed", String(progressVideo.muted));
-                };
+        const weekData = [
+            { week: 1, percent: 8, phase: "Reference capture", note: "Recorded and selected stable footage, then tested framing for the rotoscope setup.", video: "../media/videos/ProgressRoto/WEEK1.mp4" },
+            { week: 2, percent: 14, phase: "Frame planning", note: "Set the frame target and organized the source sequence for tracing." },
+            { week: 3, percent: 22, phase: "Initial tracing", note: "Began line work and checked motion continuity between frames.", video: "../media/videos/ProgressRoto/WEEK3.mp4" },
+            { week: 4, percent: 30, phase: "Layer cleanup", note: "Refined the traced structure and tightened the compositing layout." },
+            { week: 5, percent: 38, phase: "Styling pass", note: "Pushed the visual style and refined the export-ready sequences.", video: "../media/videos/ProgressRoto/WEEK5.mp4" },
+            { week: 6, percent: 47, phase: "Color testing", note: "Tested contrast, color balance, and timing adjustments." },
+            { week: 7, percent: 56, phase: "Motion polish", note: "Checked pose transitions and cleaned rough frame edges." },
+            { week: 8, percent: 65, phase: "Composite build", note: "Rebuilt the sequence with improved visual separation and pacing." },
+            { week: 9, percent: 74, phase: "Detail pass", note: "Added final line refinements and controlled highlights." },
+            { week: 10, percent: 83, phase: "Visual tuning", note: "Adjusted rhythm, balance, and finishing details." },
+            { week: 11, percent: 91, phase: "Final review", note: "Reviewed the full cut and fixed the last inconsistencies." },
+            { week: 12, percent: 100, phase: "Final export", note: "Rendered the final sequence and prepared the presentation." }
+        ];
 
-                const updateTimeline = () => {
-                    const duration = progressVideo.duration || 0;
-                    const current = progressVideo.currentTime || 0;
-                    const ratio = duration > 0 ? (current / duration) * 100 : 0;
-                    progressSeek.value = String(ratio);
-                    progressTime.textContent = `${formatTime(current)} / ${formatTime(duration)}`;
-                };
+        const renderWeekCard = (entry) => {
+            const article = document.createElement("article");
+            article.className = `week-card${entry.video ? " featured" : ""}`;
 
-                progressPlayToggle.addEventListener("click", async () => {
-                    if (progressVideo.paused) {
-                        try {
-                            await progressVideo.play();
-                        } catch (error) {
-                            // Ignore play errors.
-                        }
-                    } else {
-                        progressVideo.pause();
-                    }
-                    updatePlayButton();
-                });
+            const mediaMarkup = entry.video
+                ? `
+                    <div class="week-media">
+                        <video controls preload="metadata" aria-label="Week ${entry.week} progress video">
+                            <source src="${entry.video}" type="video/mp4" />
+                            Your browser cannot play this video format.
+                        </video>
+                    </div>
+                `
+                : "";
 
-                progressMuteToggle.addEventListener("click", () => {
-                    progressVideo.muted = !progressVideo.muted;
-                    updateMuteButton();
-                });
+            article.innerHTML = `
+                <div class="week-head">
+                    <strong>Week ${entry.week}</strong>
+                    <span>${entry.percent}%</span>
+                </div>
+                <p>${entry.phase}</p>
+                <p>${entry.note}</p>
+                ${mediaMarkup}
+                <div class="week-meter" aria-hidden="true"><span style="width: ${entry.percent}%;"></span></div>
+            `;
 
-                progressSeek.addEventListener("input", () => {
-                    if (!progressVideo.duration) return;
-                    const percent = Number(progressSeek.value);
-                    progressVideo.currentTime = (percent / 100) * progressVideo.duration;
-                    updateTimeline();
-                });
+            return article;
+        };
 
-                progressVideo.addEventListener("timeupdate", updateTimeline);
-                progressVideo.addEventListener("loadedmetadata", updateTimeline);
-                progressVideo.addEventListener("play", updatePlayButton);
-                progressVideo.addEventListener("pause", updatePlayButton);
-                progressVideo.addEventListener("ended", updatePlayButton);
+        if (weeksGrid) {
+            weekData.forEach((entry) => {
+                weeksGrid.appendChild(renderWeekCard(entry));
+            });
+        }
 
-                updatePlayButton();
-                updateMuteButton();
-                updateTimeline();
+        if (overallProgressBar && overallProgressText) {
+            const averageProgress = Math.round(
+                weekData.reduce((total, entry) => total + entry.percent, 0) / weekData.length
+            );
+            overallProgressBar.style.width = `${averageProgress}%`;
+            overallProgressText.textContent = `Overall progress: ${averageProgress}%`;
+        }
+
+        // --- Custom controls for the Edited Rotoscope Video ---
+        const rotPlayBtn = document.getElementById("rotPlay");
+        const rotProgress = document.getElementById("rotProgress");
+        const rotTime = document.getElementById("rotTime");
+        const rotVolume = document.getElementById("rotVolume");
+        const rotFS = document.getElementById("rotFS");
+
+        const formatTime = (s) => {
+            if (!isFinite(s) || s <= 0) return "0:00";
+            const m = Math.floor(s / 60);
+            const sec = Math.floor(s % 60).toString().padStart(2, "0");
+            return `${m}:${sec}`;
+        };
+
+        if (rotoscopeVideo) {
+            rotoscopeVideo.removeAttribute("controls");
+
+            rotoscopeVideo.addEventListener("loadedmetadata", () => {
+                rotProgress.max = Math.floor(rotoscopeVideo.duration) || 0;
+                rotProgress.value = 0;
+                rotTime.textContent = `0:00 / ${formatTime(rotoscopeVideo.duration)}`;
+            });
+
+            rotoscopeVideo.addEventListener("timeupdate", () => {
+                rotProgress.value = Math.floor(rotoscopeVideo.currentTime);
+                rotTime.textContent = `${formatTime(rotoscopeVideo.currentTime)} / ${formatTime(rotoscopeVideo.duration)}`;
+                if (rotoscopeVideo.paused) rotPlayBtn.textContent = "Play";
+                else rotPlayBtn.textContent = "Pause";
+            });
+
+            rotPlayBtn.addEventListener("click", () => {
+                if (rotoscopeVideo.paused) {
+                    rotoscopeVideo.play();
+                    rotPlayBtn.textContent = "Pause";
+                } else {
+                    rotoscopeVideo.pause();
+                    rotPlayBtn.textContent = "Play";
+                }
+            });
+
+            rotProgress.addEventListener("input", () => {
+                rotoscopeVideo.currentTime = Number(rotProgress.value);
+            });
+
+            rotVolume.addEventListener("input", () => {
+                rotoscopeVideo.volume = Number(rotVolume.value);
+            });
+
+            rotFS.addEventListener("click", () => {
+                const el = rotoscopeVideo.closest(".video-shell") || rotoscopeVideo;
+                if (document.fullscreenElement) document.exitFullscreen();
+                else if (el.requestFullscreen) el.requestFullscreen();
+            });
+        }
+
+        // Ensure comparison videos show native controls but keep them in sync when user wants to play both
+        const compPlayBoth = () => {
+            try {
+                if (compareBannerVideo && compareRotoscopeVideo) {
+                    compareBannerVideo.play();
+                    compareRotoscopeVideo.play();
+                }
+            } catch (e) {
+                // play() may be rejected by autoplay policy — ignore
             }
         };
 
-        setupProgressVideo("Week1");
-        setupProgressVideo("Week3");
-        setupProgressVideo("Week5");
+        const compPauseBoth = () => {
+            if (compareBannerVideo && compareRotoscopeVideo) {
+                compareBannerVideo.pause();
+                compareRotoscopeVideo.pause();
+            }
+        };
+
+        // Optional: allow clicking the comparison handle area to toggle playback of both
+        const comparisonStageEl = document.getElementById("comparisonStage");
+        if (comparisonStageEl) {
+            comparisonStageEl.addEventListener("dblclick", () => {
+                // double-click toggles play/pause for both comparison videos
+                if (compareBannerVideo && compareRotoscopeVideo) {
+                    if (compareBannerVideo.paused || compareRotoscopeVideo.paused) compPlayBoth();
+                    else compPauseBoth();
+                }
+            });
+        }
+
+        // --- Unified comparison controls (play/seek/sync/mute) ---
+        const compPlay = document.getElementById("compPlay");
+        const compPause = document.getElementById("compPause");
+        const compSeek = document.getElementById("compSeek");
+        const compSync = document.getElementById("compSync");
+        const compMute = document.getElementById("compMute");
+        const compTime = document.getElementById("compTime");
+
+        const updateCompDuration = () => {
+            const dur = (compareBannerVideo && isFinite(compareBannerVideo.duration) && compareBannerVideo.duration) ||
+                (compareRotoscopeVideo && isFinite(compareRotoscopeVideo.duration) && compareRotoscopeVideo.duration) || 0;
+            compSeek.max = Math.floor(dur) || 0;
+            compTime.textContent = `0:00 / ${formatTime(dur)}`;
+        };
+
+        const updateCompTime = () => {
+            const t = (compareBannerVideo && compareBannerVideo.currentTime) || (compareRotoscopeVideo && compareRotoscopeVideo.currentTime) || 0;
+            const d = (compareBannerVideo && compareBannerVideo.duration) || (compareRotoscopeVideo && compareRotoscopeVideo.duration) || 0;
+            compSeek.value = Math.floor(t);
+            compTime.textContent = `${formatTime(t)} / ${formatTime(d)}`;
+        };
+
+        if (compareBannerVideo) compareBannerVideo.addEventListener("loadedmetadata", updateCompDuration);
+        if (compareRotoscopeVideo) compareRotoscopeVideo.addEventListener("loadedmetadata", updateCompDuration);
+
+        // Keep comp time display updated
+        if (compareBannerVideo) compareBannerVideo.addEventListener("timeupdate", updateCompTime);
+        if (compareRotoscopeVideo) compareRotoscopeVideo.addEventListener("timeupdate", updateCompTime);
+
+        compPlay && compPlay.addEventListener("click", compPlayBoth);
+        compPause && compPause.addEventListener("click", compPauseBoth);
+
+        let isSeeking = false;
+        compSeek && compSeek.addEventListener("input", () => {
+            isSeeking = true;
+            const t = Number(compSeek.value);
+            if (compareBannerVideo) compareBannerVideo.currentTime = t;
+            if (compareRotoscopeVideo) compareRotoscopeVideo.currentTime = t;
+            // small timeout to allow videos to settle
+            setTimeout(() => { isSeeking = false; }, 60);
+        });
+
+        // Sync behavior: if checked, keep right video in sync with left's time updates
+        if (compareBannerVideo) {
+            compareBannerVideo.addEventListener("timeupdate", () => {
+                if (compSync && compSync.checked && !isSeeking && compareRotoscopeVideo) {
+                    const diff = Math.abs(compareRotoscopeVideo.currentTime - compareBannerVideo.currentTime);
+                    if (diff > 0.15) compareRotoscopeVideo.currentTime = compareBannerVideo.currentTime;
+                }
+            });
+        }
+
+        // Mute toggle applies to both
+        compMute && compMute.addEventListener("change", () => {
+            const muted = compMute.checked;
+            if (compareBannerVideo) compareBannerVideo.muted = muted;
+            if (compareRotoscopeVideo) compareRotoscopeVideo.muted = muted;
+        });
     </script>
 </body>
 </html>

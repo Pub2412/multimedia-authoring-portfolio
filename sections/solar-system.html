@@ -356,13 +356,15 @@
         }
 
         .planet-display.mercury-mode,
-        .planet-display.sun-mode {
+        .planet-display.sun-mode,
+        .planet-display.venus-mode {
             align-items: stretch;
             padding: 18px;
         }
 
         .planet-display.mercury-mode .planet-overlay,
-        .planet-display.sun-mode .planet-overlay {
+        .planet-display.sun-mode .planet-overlay,
+        .planet-display.venus-mode .planet-overlay {
             height: 100%;
             align-self: stretch;
             justify-content: flex-start;
@@ -372,7 +374,8 @@
         }
 
         .planet-display.mercury-mode .planet-video,
-        .planet-display.sun-mode .planet-video {
+        .planet-display.sun-mode .planet-video,
+        .planet-display.venus-mode .planet-video {
             box-shadow: none;
             filter: none;
         }
@@ -380,13 +383,16 @@
         .planet-display.mercury-mode .planet-name,
         .planet-display.mercury-mode .planet-copy,
         .planet-display.sun-mode .planet-name,
-        .planet-display.sun-mode .planet-copy {
+        .planet-display.sun-mode .planet-copy,
+        .planet-display.venus-mode .planet-name,
+        .planet-display.venus-mode .planet-copy {
             position: relative;
             z-index: 1;
         }
 
         .planet-display.mercury-mode .planet-name,
-        .planet-display.sun-mode .planet-name {
+        .planet-display.sun-mode .planet-name,
+        .planet-display.venus-mode .planet-name {
             margin: 0;
             position: absolute;
             top: 0;
@@ -396,17 +402,20 @@
         }
 
         .planet-display.mercury-mode .planet-copy,
-        .planet-display.sun-mode .planet-copy {
+        .planet-display.sun-mode .planet-copy,
+        .planet-display.venus-mode .planet-copy {
             display: none;
         }
 
         .planet-display.mercury-mode .viewfinder-meta,
-        .planet-display.sun-mode .viewfinder-meta {
+        .planet-display.sun-mode .viewfinder-meta,
+        .planet-display.venus-mode .viewfinder-meta {
             display: none;
         }
 
         .planet-display.mercury-mode .mode-pill,
-        .planet-display.sun-mode .mode-pill {
+        .planet-display.sun-mode .mode-pill,
+        .planet-display.venus-mode .mode-pill {
             color: #f6fbff;
             background: rgba(3, 7, 14, 0.46);
             border-color: rgba(255, 255, 255, 0.12);
@@ -414,7 +423,8 @@
         }
 
         .planet-display.mercury-mode .planet-overlay::before,
-        .planet-display.sun-mode .planet-overlay::before {
+        .planet-display.sun-mode .planet-overlay::before,
+        .planet-display.venus-mode .planet-overlay::before {
             display: none;
         }
 
@@ -1085,7 +1095,8 @@
         const hyperspaceVideo = document.getElementById("hyperspaceVideo");
         const planetVideoSources = {
             Sun: "../media/videos/Planets/sun.mp4",
-            Mercury: "../media/videos/Planets/mercury.mp4"
+            Mercury: "../media/videos/Planets/mercury.mp4",
+            Venus: "../media/videos/Planets/venus.mp4"
         };
         const maxDistanceAu = 39.5;
         const earthAgeInput = document.getElementById("earthAge");
@@ -1211,6 +1222,7 @@
             const isVideoPlanet = Boolean(videoSource);
             planetDisplay.classList.toggle("mercury-mode", planetNameValue === "Mercury");
             planetDisplay.classList.toggle("sun-mode", planetNameValue === "Sun");
+            planetDisplay.classList.toggle("venus-mode", planetNameValue === "Venus");
             planetOrb.style.display = isVideoPlanet ? "none" : "block";
             planetVideo.style.display = isVideoPlanet ? "block" : "none";
 
