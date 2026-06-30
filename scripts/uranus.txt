@@ -1,0 +1,470 @@
+"""
+Uranus + Rings + Moons 3D Model — Blender 5.x  |  Auto-Download Textures Edition
+===================================================================
+Requires Blender 5.0 or newer.
+
+Models Uranus, its faint ring system, and its five major ("classical") moons —
+Miranda, Ariel, Umbriel, Titania, and Oberon. Uranus has 27 known moons, but
+the rest are small irregular/outer captures not worth modelling here.
+
+UNIQUE FEATURE: Uranus is tipped over on its side (~97.77° axial tilt) and
+spins retrograde, and its rings/moons orbit in that same tilted equatorial
+plane rather than flat against the ecliptic like every other planet modelled
+so far. This is handled with a single tilted parent empty ("Uranus_System")
+that the planet, rings, and all five moons are parented to — orbits are
+still computed as flat circles in local space, but the shared tilt makes
+the whole system appear to roll sideways, which is how it really looks.
+
+Background galaxy uses a CUSTOM PNG image.
+Texture source: Solar System Scope / NASA (CC BY 4.0 / public domain).
+"""
+
+SAVE_DIR = ""   # Leave "" to save next to the .blend file,
+                # or set a full path, e.g. r"C:\Textures\Uranus"
+
+# ── Texture quality ────────────────────────────────────────────────────────
+# NOTE: verify these URLs resolve before running — Wikimedia/NASA file
+# hashes are not predictable. If a download fails, grab the matching
+# texture from solarsystemscope.com/textures or a NASA image archive and
+# drop it in SAVE_DIR with the filename listed below.
+URANUS_TEXTURE_URL  = "https://upload.wikimedia.org/wikipedia/commons/8/8b/Solarsystemscope_texture_2k_uranus.jpg"
+URANUS_TEXTURE_NAME = "2k_uranus.jpg"
+
+# Uranus's rings are dark and narrow with almost no albedo variation, so a
+# simple alpha-banded texture (gaps = transparent) is enough; there isn't a
+# widely available high-res "true color" ring photo like Saturn's.
+RING_TEXTURE_URL  = "https://upload.wikimedia.org/wikipedia/commons/3/3a/Uranus_rings_alpha.png"
+RING_TEXTURE_NAME = "uranus_ring_alpha.png"
+
+# ── Moons (the five major/"classical" moons) ────────────────────────────────
+# Real radii, orbital distances and orbital periods (NASA/JPL values).
+MOONS = [
+    {
+        "name": "Miranda", "radius_km": 235.8, "orbit_km": 129_390, "period_days": 1.413,
+        "texture_url": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Miranda_Mosaic_Cropped.jpg",
+        "texture_name": "miranda.jpg",
+    },
+    {
+        "name": "Ariel", "radius_km": 578.9, "orbit_km": 190_900, "period_days": 2.520,
+        "texture_url": "https://upload.wikimedia.org/wikipedia/commons/0/0e/Ariel_(moon).jpg",
+        "texture_name": "ariel.jpg",
+    },
+    {
+        "name": "Umbriel", "radius_km": 584.7, "orbit_km": 266_000, "period_days": 4.144,
+        "texture_url": "https://upload.wikimedia.org/wikipedia/commons/8/8a/Umbriel_(moon)_color_cropped.jpg",
+        "texture_name": "umbriel.jpg",
+    },
+    {
+        "name": "Titania", "radius_km": 788.4, "orbit_km": 436_300, "period_days": 8.706,
+        "texture_url": "https://upload.wikimedia.org/wikipedia/commons/4/41/Titania_(moon)_color_cropped.jpg",
+        "texture_name": "titania.jpg",
+    },
+    {
+        "name": "Oberon", "radius_km": 761.4, "orbit_km": 583_500, "period_days": 13.46,
+        "texture_url": "https://upload.wikimedia.org/wikipedia/commons/c/cb/Voyager_2_picture_of_Oberon.jpg",
+        "texture_name": "oberon.jpg",
+    },
+]
+
+# ── Scale & Animation ─────────────────────────────────────────────────────
+SCALE_KM_PER_BU      = 8_000     # 1 Blender Unit = 8,000 km
+URANUS_RADIUS_KM     = 25_362    # equatorial radius
+URANUS_ROTATION_DAYS = 0.718     # rotation is retrograde — handled with a negative spin below
+URANUS_AXIAL_TILT_DEG = 97.77    # Uranus rotates almost exactly on its side
+
+RING_INNER_KM = 38_000           # roughly the inner edge of the main ring system
+RING_OUTER_KM = 51_149           # outer edge of the epsilon ring
+
+MOON_SIZE_EXAGGERATION = 8.0     # even the big moons get lost at this scale
+
+ANIM_FRAMES = 360
+FPS         = 24
+
+# ── Render / Camera ────────────────────────────────────────────────────────
+CAMERA_DISTANCE = 150.0
+CAMERA_HEIGHT   = 50.0
+CAMERA_FOCAL_MM = 35.0
+
+# ── Custom background image (PNG) ──────────────────────────────────────────
+BACKGROUND_IMAGE_PATH = r"C:\Users\Lancelot\Documents\School Files\Y2T3\MMA\Solar_System\Planets\Uranus\bg.png"
+BACKGROUND_STRENGTH    = 1.5
+BG_IMAGE_WIDTH         = 1980
+BG_IMAGE_HEIGHT        = 1080
+
+# ─────────────────────────────────────────────────────────────────────────
+
+import bpy
+import bmesh
+import math
+import os
+import urllib.request
+import ssl
+from bpy_extras import anim_utils
+
+URANUS_RADIUS_BU = URANUS_RADIUS_KM / SCALE_KM_PER_BU
+RING_INNER_BU    = RING_INNER_KM / SCALE_KM_PER_BU
+RING_OUTER_BU    = RING_OUTER_KM / SCALE_KM_PER_BU
+
+
+# ── 0. Resolve save directory ───────────────────────────────────────────────
+
+def get_save_dir():
+    if SAVE_DIR:
+        d = os.path.normpath(SAVE_DIR)
+    else:
+        blend_path = bpy.data.filepath
+        if blend_path:
+            d = os.path.dirname(blend_path)
+        else:
+            d = os.path.join(os.path.expanduser("~"), "Uranus_Textures")
+    os.makedirs(d, exist_ok=True)
+    return d
+
+
+# ── 1. Download texture ─────────────────────────────────────────────────────
+
+def download_texture(url, name, save_dir):
+    dest = os.path.join(save_dir, name)
+
+    if os.path.isfile(dest):
+        print(f"  [SKIP] Already exists: {name}")
+        return dest
+
+    print(f"  [DL]  Downloading {name} …")
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode    = ssl.CERT_NONE
+
+    try:
+        req = urllib.request.Request(
+            url, headers={"User-Agent": "Mozilla/5.0 (Blender texture downloader)"},
+        )
+        with urllib.request.urlopen(req, context=ctx) as resp, open(dest, "wb") as f:
+            total = int(resp.headers.get("Content-Length", 0))
+            downloaded = 0
+            chunk = 1 << 16
+            while True:
+                data = resp.read(chunk)
+                if not data:
+                    break
+                f.write(data)
+                downloaded += len(data)
+                if total:
+                    pct = downloaded / total * 100
+                    print(f"       {pct:5.1f}%  ({downloaded//1024} KB / {total//1024} KB)",
+                          end="\r")
+        print(f"\n  [OK]  Saved → {dest}")
+        return dest
+    except Exception as e:
+        print(f"  [ERR] Failed to download {url}\n        {e}")
+        return None
+
+
+# ── 2. Load image ───────────────────────────────────────────────────────────
+
+def load_image(filepath, colorspace="sRGB"):
+    if not filepath or not os.path.isfile(filepath):
+        return None
+    img = bpy.data.images.load(filepath, check_existing=True)
+    img.colorspace_settings.name = colorspace
+    return img
+
+
+# ── 3. Clear scene ──────────────────────────────────────────────────────────
+
+def clear_scene():
+    bpy.ops.object.select_all(action='SELECT')
+    bpy.ops.object.delete(use_global=False)
+    for col in bpy.data.collections:
+        bpy.data.collections.remove(col)
+    bpy.ops.outliner.orphans_purge(do_recursive=True)
+
+
+# ── 4. Sphere ────────────────────────────────────────────────────────────────
+
+def create_sphere(name, radius, location=(0, 0, 0), segments=128, ring_count=64):
+    bpy.ops.mesh.primitive_uv_sphere_add(
+        radius=radius, segments=segments, ring_count=ring_count, location=location
+    )
+    obj = bpy.context.active_object
+    obj.name = name
+    bpy.ops.object.shade_smooth()
+    sub = obj.modifiers.new("Subdivision", 'SUBSURF')
+    sub.levels = 2; sub.render_levels = 3
+    return obj
+
+
+# ── 5. Flat annulus mesh (for the rings) ──────────────────────────────────────
+
+def create_ring_mesh(name, inner_radius, outer_radius, segments=128):
+    """Builds a flat ring (annulus) so a single ring-alpha texture can be
+    radially mapped across it — no need to fake rings with a torus."""
+    mesh = bpy.data.meshes.new(name)
+    obj  = bpy.data.objects.new(name, mesh)
+    bpy.context.collection.objects.link(obj)
+
+    bm = bmesh.new()
+    inner_verts = []
+    outer_verts = []
+    for i in range(segments):
+        angle = math.tau * i / segments
+        x, y = math.cos(angle), math.sin(angle)
+        inner_verts.append(bm.verts.new((x * inner_radius, y * inner_radius, 0)))
+        outer_verts.append(bm.verts.new((x * outer_radius, y * outer_radius, 0)))
+
+    bm.verts.ensure_lookup_table()
+    for i in range(segments):
+        j = (i + 1) % segments
+        bm.faces.new((inner_verts[i], inner_verts[j], outer_verts[j], outer_verts[i]))
+
+    uv_layer = bm.loops.layers.uv.new("UVMap")
+    for face in bm.faces:
+        for loop in face.loops:
+            v = loop.vert
+            r = math.hypot(v.co.x, v.co.y)
+            u = (math.atan2(v.co.y, v.co.x) + math.pi) / math.tau
+            t = (r - inner_radius) / (outer_radius - inner_radius)
+            loop[uv_layer].uv = (u, t)
+
+    bm.to_mesh(mesh)
+    bm.free()
+    bpy.context.view_layer.objects.active = obj
+    obj.select_set(True)
+    bpy.ops.object.shade_smooth()
+    return obj
+
+
+def create_ring_material(name, img_alpha):
+    mat   = bpy.data.materials.new(name)
+    mat.use_nodes = True
+    mat.blend_method  = 'HASHED'
+    mat.shadow_method = 'HASHED' if hasattr(mat, "shadow_method") else mat.blend_method
+    nodes = mat.node_tree.nodes
+    links = mat.node_tree.links
+    nodes.clear()
+
+    def N(t, loc):
+        n = nodes.new(t); n.location = loc; return n
+
+    out    = N("ShaderNodeOutputMaterial", (1000, 0))
+    mix    = N("ShaderNodeMixShader", (700, 0))
+    bsdf   = N("ShaderNodeBsdfPrincipled", (400, 150))
+    transp = N("ShaderNodeBsdfTransparent", (400, -150))
+    tex    = N("ShaderNodeTexImage", (100, 0))
+
+    bsdf.inputs["Roughness"].default_value = 0.85
+    # Uranus's rings are notably dark (low albedo, almost charcoal-grey)
+    bsdf.inputs["Base Color"].default_value = (0.08, 0.08, 0.09, 1.0)
+
+    if img_alpha:
+        tex.image = img_alpha
+        links.new(tex.outputs["Alpha"], mix.inputs["Fac"])
+
+    links.new(transp.outputs["BSDF"], mix.inputs[1])
+    links.new(bsdf.outputs["BSDF"], mix.inputs[2])
+    links.new(mix.outputs["Shader"], out.inputs["Surface"])
+    return mat
+
+
+# ── 6. Materials (non-emissive, lit surfaces) ────────────────────────────────
+
+def create_surface_material(name, img_color, roughness=0.9):
+    mat   = bpy.data.materials.new(name)
+    mat.use_nodes = True
+    nodes = mat.node_tree.nodes
+    links = mat.node_tree.links
+    nodes.clear()
+
+    def N(t, loc):
+        n = nodes.new(t); n.location = loc; return n
+
+    out  = N("ShaderNodeOutputMaterial", (1000, 0))
+    bsdf = N("ShaderNodeBsdfPrincipled", (700, 0))
+    bsdf.inputs["Roughness"].default_value = roughness
+
+    tex = N("ShaderNodeTexImage", (300, 0))
+    if img_color:
+        tex.image = img_color
+        links.new(tex.outputs["Color"], bsdf.inputs["Base Color"])
+
+    links.new(bsdf.outputs["BSDF"], out.inputs["Surface"])
+    return mat
+
+
+# ── 7. Axial rotation & orbit ─────────────────────────────────────────────────
+
+def animate_spin(obj, frame_start=1, frame_end=ANIM_FRAMES, retrograde=False):
+    direction = -1 if retrograde else 1
+    obj.rotation_euler = (0, 0, 0.0)
+    obj.keyframe_insert(data_path="rotation_euler", frame=frame_start)
+    obj.rotation_euler[2] = math.tau * direction
+    obj.keyframe_insert(data_path="rotation_euler", frame=frame_end)
+    _linearize(obj)
+
+
+def animate_orbit(obj, radius, loops=1, frame_start=1, frame_end=ANIM_FRAMES):
+    """Animates obj on a circular orbit of given radius, in its *local* XY
+    plane. Combined with a tilted parent, this produces a tilted orbit."""
+    steps = 4 * max(1, round(loops))
+    for i in range(steps + 1):
+        frame = frame_start + (frame_end - frame_start) * (i / steps)
+        angle = math.tau * loops * (i / steps)
+        obj.location = (radius * math.cos(angle), radius * math.sin(angle), obj.location.z)
+        obj.keyframe_insert(data_path="location", frame=frame)
+    _linearize(obj)
+
+
+def _linearize(obj):
+    ad = obj.animation_data
+    if ad and ad.action:
+        cb = anim_utils.action_get_channelbag_for_slot(ad.action, ad.action_slot)
+        if cb:
+            for fc in cb.fcurves:
+                for kp in fc.keyframe_points:
+                    kp.interpolation = 'LINEAR'
+
+
+# ── 8. Tilted system parent ───────────────────────────────────────────────────
+
+def create_system_empty():
+    """A single empty tilted to Uranus's real ~98° axial tilt. Uranus, its
+    rings, and all five moons get parented to this so the whole system
+    rolls sideways together, instead of orbiting flat like every other
+    planet's moons."""
+    empty = bpy.data.objects.new("Uranus_System", None)
+    bpy.context.collection.objects.link(empty)
+    empty.rotation_euler = (math.radians(URANUS_AXIAL_TILT_DEG), 0, 0)
+    return empty
+
+
+# ── 9. Camera ──────────────────────────────────────────────────────────────────
+
+def create_camera():
+    bpy.ops.object.camera_add(location=(0, -CAMERA_DISTANCE, CAMERA_HEIGHT))
+    cam = bpy.context.active_object
+    cam.name = "Camera"
+    cam.rotation_euler = (math.radians(73), 0, 0)
+    cam.data.lens = CAMERA_FOCAL_MM
+    bpy.context.scene.camera = cam
+
+
+# ── 10. Sun lamp (Uranus is not self-illuminating) ──────────────────────────
+
+def create_sun_lamp():
+    bpy.ops.object.light_add(type='SUN', location=(-120, -120, 120))
+    lamp = bpy.context.active_object
+    lamp.name = "Sunlight"
+    lamp.data.energy = 0.7   # Uranus is ~19.8 AU out — quite dim sunlight by this point
+    lamp.rotation_euler = (math.radians(55), 0, math.radians(35))
+    return lamp
+
+
+# ── 11. World / Custom PNG background with aspect fix ───────────────────────
+
+def setup_world():
+    world = bpy.context.scene.world
+    if world is None:
+        world = bpy.data.worlds.new("World")
+        bpy.context.scene.world = world
+    world.use_nodes = True
+
+    wn = world.node_tree.nodes
+    wl = world.node_tree.links
+    wn.clear()
+
+    out = wn.new("ShaderNodeOutputWorld")
+    bg  = wn.new("ShaderNodeBackground")
+    bg.inputs["Strength"].default_value = BACKGROUND_STRENGTH
+
+    tex = wn.new("ShaderNodeTexImage")
+    if os.path.isfile(BACKGROUND_IMAGE_PATH):
+        tex.image = bpy.data.images.load(BACKGROUND_IMAGE_PATH, check_existing=True)
+        tex.image.colorspace_settings.name = "sRGB"
+        print(f"  BG PNG  : Custom background → {BACKGROUND_IMAGE_PATH}")
+    else:
+        print("  BG PNG  : Background image not found, using black")
+        bg.inputs["Color"].default_value = (0.0, 0.0, 0.0, 1)
+
+    tc = wn.new("ShaderNodeTexCoord")
+    mapping = wn.new("ShaderNodeMapping")
+
+    aspect = BG_IMAGE_WIDTH / BG_IMAGE_HEIGHT
+    mapping.inputs["Scale"].default_value = (aspect, 1.0, 1.0)
+
+    wl.new(tc.outputs["Window"], mapping.inputs["Vector"])
+    wl.new(mapping.outputs["Vector"], tex.inputs["Vector"])
+    wl.new(tex.outputs["Color"], bg.inputs["Color"])
+    wl.new(bg.outputs["Background"], out.inputs["Surface"])
+
+
+# ── 12. Render settings ───────────────────────────────────────────────────────
+
+def setup_render():
+    scene = bpy.context.scene
+    scene.render.engine          = 'CYCLES'
+    scene.cycles.samples         = 128
+    scene.cycles.use_denoising  = True
+    scene.render.resolution_x    = 1920
+    scene.render.resolution_y    = 1080
+    scene.render.resolution_percentage = 100
+    scene.cycles.transparent_max_bounces = 16  # rings need extra alpha bounces to look right
+
+
+# ── Main ─────────────────────────────────────────────────────────────────────
+
+def main():
+    save_dir = get_save_dir()
+
+    uranus_tex = download_texture(URANUS_TEXTURE_URL, URANUS_TEXTURE_NAME, save_dir)
+    ring_tex   = download_texture(RING_TEXTURE_URL, RING_TEXTURE_NAME, save_dir)
+    for moon in MOONS:
+        moon["texture_path"] = download_texture(moon["texture_url"], moon["texture_name"], save_dir)
+
+    clear_scene()
+
+    scene = bpy.context.scene
+    scene.frame_start = 1; scene.frame_end = ANIM_FRAMES; scene.render.fps = FPS
+
+    system = create_system_empty()
+
+    # Uranus
+    uranus_img = load_image(uranus_tex, "sRGB")
+    uranus = create_sphere("Uranus", URANUS_RADIUS_BU)
+    uranus.data.materials.append(create_surface_material("Uranus_Surface", uranus_img, roughness=0.6))
+    uranus.parent = system
+    animate_spin(uranus, retrograde=True)
+
+    # Rings — already in the same equatorial plane as Uranus by virtue of
+    # sharing the tilted parent, so no extra tilt needed here.
+    ring_img = load_image(ring_tex, "sRGB")
+    rings = create_ring_mesh("Uranus_Rings", RING_INNER_BU, RING_OUTER_BU)
+    rings.data.materials.append(create_ring_material("Rings_Surface", ring_img))
+    rings.parent = system
+
+    # Slowest-orbiting moon (Oberon) sets the baseline of 1 loop; the others
+    # complete proportionally more loops in the same ANIM_FRAMES window, just
+    # like their real relative orbital speeds.
+    slowest_period = max(m["period_days"] for m in MOONS)
+
+    for moon in MOONS:
+        radius_bu = (moon["radius_km"] / SCALE_KM_PER_BU) * MOON_SIZE_EXAGGERATION
+        orbit_bu  = moon["orbit_km"] / SCALE_KM_PER_BU
+        loops     = slowest_period / moon["period_days"]
+
+        img = load_image(moon["texture_path"], "sRGB")
+        obj = create_sphere(moon["name"], radius_bu, location=(orbit_bu, 0, 0),
+                             segments=64, ring_count=32)
+        obj.data.materials.append(create_surface_material(f"{moon['name']}_Surface", img, roughness=0.95))
+        obj.parent = system
+
+        # All five major moons are tidally locked to Uranus: spin period == orbit period.
+        animate_spin(obj)
+        animate_orbit(obj, orbit_bu, loops=loops)
+
+    create_camera()
+    create_sun_lamp()
+    setup_world()
+    setup_render()
+
+
+main()

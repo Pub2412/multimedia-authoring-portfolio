@@ -1,0 +1,356 @@
+"""
+Jupiter + Moons 3D Model — Blender 5.x  |  Auto-Download Textures Edition
+===================================================================
+Requires Blender 5.0 or newer.
+
+Models Jupiter and its four Galilean moons (Io, Europa, Ganymede, Callisto —
+the only ones visible to a casual observer; Jupiter actually has 95+ known
+moons, but the rest are tiny captured asteroids not worth modelling here).
+Each body spins on its own axis; each moon also orbits Jupiter.
+Background galaxy uses a CUSTOM PNG image.
+Texture source: Solar System Scope / NASA (CC BY 4.0 / public domain).
+"""
+
+SAVE_DIR = ""   # Leave "" to save next to the .blend file,
+                # or set a full path, e.g. r"C:\Textures\Jupiter"
+
+# ── Texture quality ────────────────────────────────────────────────────────
+# NOTE: verify these URLs resolve before running — Wikimedia file hashes
+# are not predictable. If a download fails, grab the matching texture from
+# solarsystemscope.com/textures or a NASA image archive and drop it in
+# SAVE_DIR with the filename listed below.
+JUPITER_TEXTURE_URL  = "https://upload.wikimedia.org/wikipedia/commons/1/1f/Solarsystemscope_texture_2k_jupiter.jpg"
+JUPITER_TEXTURE_NAME = "2k_jupiter.jpg"
+
+# ── Moons (Galilean) ───────────────────────────────────────────────────────
+# Real radii, orbital distances and orbital periods (NASA/JPL values).
+MOONS = [
+    {
+        "name": "Io",
+        "radius_km": 1_821.6,
+        "orbit_km": 421_800,
+        "period_days": 1.769,
+        "texture_url": "https://upload.wikimedia.org/wikipedia/commons/8/84/Io_highest_resolution_true_color.jpg",
+        "texture_name": "io.jpg",
+    },
+    {
+        "name": "Europa",
+        "radius_km": 1_560.8,
+        "orbit_km": 671_100,
+        "period_days": 3.551,
+        "texture_url": "https://upload.wikimedia.org/wikipedia/commons/2/27/Europa-moon.jpg",
+        "texture_name": "europa.jpg",
+    },
+    {
+        "name": "Ganymede",
+        "radius_km": 2_634.1,
+        "orbit_km": 1_070_400,
+        "period_days": 7.155,
+        "texture_url": "https://upload.wikimedia.org/wikipedia/commons/c/c8/Ganymede_g1_true_edit1.jpg",
+        "texture_name": "ganymede.jpg",
+    },
+    {
+        "name": "Callisto",
+        "radius_km": 2_410.3,
+        "orbit_km": 1_882_700,
+        "period_days": 16.69,
+        "texture_url": "https://upload.wikimedia.org/wikipedia/commons/e/e9/Callisto.jpg",
+        "texture_name": "callisto.jpg",
+    },
+]
+
+# ── Scale & Animation ─────────────────────────────────────────────────────
+SCALE_KM_PER_BU     = 15_000     # 1 Blender Unit = 15,000 km
+JUPITER_RADIUS_KM   = 69_911
+JUPITER_ROTATION_DAYS = 0.4135   # fastest-spinning planet in the solar system
+
+MOON_SIZE_EXAGGERATION = 3.0     # Galilean moons are large but still get lost at this scale
+
+ANIM_FRAMES = 360
+FPS         = 24
+
+# ── Render / Camera ────────────────────────────────────────────────────────
+CAMERA_DISTANCE = 220.0
+CAMERA_HEIGHT   = 70.0
+CAMERA_FOCAL_MM = 35.0
+
+# ── Custom background image (PNG) ──────────────────────────────────────────
+BACKGROUND_IMAGE_PATH = r"C:\Users\Lancelot\Documents\School Files\Y2T3\MMA\Solar_System\Planets\Jupiter\bg.png"
+BACKGROUND_STRENGTH    = 1.5
+BG_IMAGE_WIDTH         = 1980
+BG_IMAGE_HEIGHT        = 1080
+
+# ─────────────────────────────────────────────────────────────────────────
+
+import bpy
+import math
+import os
+import urllib.request
+import ssl
+from bpy_extras import anim_utils
+
+JUPITER_RADIUS_BU = JUPITER_RADIUS_KM / SCALE_KM_PER_BU
+
+
+# ── 0. Resolve save directory ───────────────────────────────────────────────
+
+def get_save_dir():
+    if SAVE_DIR:
+        d = os.path.normpath(SAVE_DIR)
+    else:
+        blend_path = bpy.data.filepath
+        if blend_path:
+            d = os.path.dirname(blend_path)
+        else:
+            d = os.path.join(os.path.expanduser("~"), "Jupiter_Textures")
+    os.makedirs(d, exist_ok=True)
+    return d
+
+
+# ── 1. Download texture ─────────────────────────────────────────────────────
+
+def download_texture(url, name, save_dir):
+    dest = os.path.join(save_dir, name)
+
+    if os.path.isfile(dest):
+        print(f"  [SKIP] Already exists: {name}")
+        return dest
+
+    print(f"  [DL]  Downloading {name} …")
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode    = ssl.CERT_NONE
+
+    try:
+        req = urllib.request.Request(
+            url, headers={"User-Agent": "Mozilla/5.0 (Blender texture downloader)"},
+        )
+        with urllib.request.urlopen(req, context=ctx) as resp, open(dest, "wb") as f:
+            total = int(resp.headers.get("Content-Length", 0))
+            downloaded = 0
+            chunk = 1 << 16
+            while True:
+                data = resp.read(chunk)
+                if not data:
+                    break
+                f.write(data)
+                downloaded += len(data)
+                if total:
+                    pct = downloaded / total * 100
+                    print(f"       {pct:5.1f}%  ({downloaded//1024} KB / {total//1024} KB)",
+                          end="\r")
+        print(f"\n  [OK]  Saved → {dest}")
+        return dest
+    except Exception as e:
+        print(f"  [ERR] Failed to download {url}\n        {e}")
+        return None
+
+
+# ── 2. Load image ───────────────────────────────────────────────────────────
+
+def load_image(filepath, colorspace="sRGB"):
+    if not filepath or not os.path.isfile(filepath):
+        return None
+    img = bpy.data.images.load(filepath, check_existing=True)
+    img.colorspace_settings.name = colorspace
+    return img
+
+
+# ── 3. Clear scene ──────────────────────────────────────────────────────────
+
+def clear_scene():
+    bpy.ops.object.select_all(action='SELECT')
+    bpy.ops.object.delete(use_global=False)
+    for col in bpy.data.collections:
+        bpy.data.collections.remove(col)
+    bpy.ops.outliner.orphans_purge(do_recursive=True)
+
+
+# ── 4. Sphere ────────────────────────────────────────────────────────────────
+
+def create_sphere(name, radius, location=(0, 0, 0), segments=128, ring_count=64):
+    bpy.ops.mesh.primitive_uv_sphere_add(
+        radius=radius, segments=segments, ring_count=ring_count, location=location
+    )
+    obj = bpy.context.active_object
+    obj.name = name
+    bpy.ops.object.shade_smooth()
+    sub = obj.modifiers.new("Subdivision", 'SUBSURF')
+    sub.levels = 2; sub.render_levels = 3
+    return obj
+
+
+# ── 5. Materials (non-emissive, lit surfaces) ────────────────────────────────
+
+def create_surface_material(name, img_color, roughness=0.9):
+    mat   = bpy.data.materials.new(name)
+    mat.use_nodes = True
+    nodes = mat.node_tree.nodes
+    links = mat.node_tree.links
+    nodes.clear()
+
+    def N(t, loc):
+        n = nodes.new(t); n.location = loc; return n
+
+    out  = N("ShaderNodeOutputMaterial", (1000, 0))
+    bsdf = N("ShaderNodeBsdfPrincipled", (700, 0))
+    bsdf.inputs["Roughness"].default_value = roughness
+
+    tex = N("ShaderNodeTexImage", (300, 0))
+    if img_color:
+        tex.image = img_color
+        links.new(tex.outputs["Color"], bsdf.inputs["Base Color"])
+
+    links.new(bsdf.outputs["BSDF"], out.inputs["Surface"])
+    return mat
+
+
+# ── 6. Axial rotation & orbit ─────────────────────────────────────────────────
+
+def animate_spin(obj, frame_start=1, frame_end=ANIM_FRAMES):
+    obj.rotation_euler = (0, 0, 0.0)
+    obj.keyframe_insert(data_path="rotation_euler", frame=frame_start)
+    obj.rotation_euler[2] = math.tau
+    obj.keyframe_insert(data_path="rotation_euler", frame=frame_end)
+    _linearize(obj)
+
+
+def animate_orbit(obj, radius, loops=1, frame_start=1, frame_end=ANIM_FRAMES):
+    """Animates obj on a circular orbit of given radius around the world origin."""
+    steps = 4 * max(1, round(loops))  # enough keyframes to keep multi-loop orbits circular
+    for i in range(steps + 1):
+        frame = frame_start + (frame_end - frame_start) * (i / steps)
+        angle = math.tau * loops * (i / steps)
+        obj.location = (radius * math.cos(angle), radius * math.sin(angle), obj.location.z)
+        obj.keyframe_insert(data_path="location", frame=frame)
+    _linearize(obj)
+
+
+def _linearize(obj):
+    ad = obj.animation_data
+    if ad and ad.action:
+        cb = anim_utils.action_get_channelbag_for_slot(ad.action, ad.action_slot)
+        if cb:
+            for fc in cb.fcurves:
+                for kp in fc.keyframe_points:
+                    kp.interpolation = 'LINEAR'
+
+
+# ── 7. Camera ──────────────────────────────────────────────────────────────────
+
+def create_camera():
+    bpy.ops.object.camera_add(location=(0, -CAMERA_DISTANCE, CAMERA_HEIGHT))
+    cam = bpy.context.active_object
+    cam.name = "Camera"
+    cam.rotation_euler = (math.radians(73), 0, 0)
+    cam.data.lens = CAMERA_FOCAL_MM
+    bpy.context.scene.camera = cam
+
+
+# ── 8. Sun lamp (Jupiter is not self-illuminating) ──────────────────────────
+
+def create_sun_lamp():
+    bpy.ops.object.light_add(type='SUN', location=(-100, -100, 100))
+    lamp = bpy.context.active_object
+    lamp.name = "Sunlight"
+    lamp.data.energy = 2.0   # dimmer than the Mars scene — Jupiter is ~3.5x farther from the Sun
+    lamp.rotation_euler = (math.radians(55), 0, math.radians(35))
+    return lamp
+
+
+# ── 9. World / Custom PNG background with aspect fix ────────────────────────
+
+def setup_world():
+    world = bpy.context.scene.world
+    if world is None:
+        world = bpy.data.worlds.new("World")
+        bpy.context.scene.world = world
+    world.use_nodes = True
+
+    wn = world.node_tree.nodes
+    wl = world.node_tree.links
+    wn.clear()
+
+    out = wn.new("ShaderNodeOutputWorld")
+    bg  = wn.new("ShaderNodeBackground")
+    bg.inputs["Strength"].default_value = BACKGROUND_STRENGTH
+
+    tex = wn.new("ShaderNodeTexImage")
+    if os.path.isfile(BACKGROUND_IMAGE_PATH):
+        tex.image = bpy.data.images.load(BACKGROUND_IMAGE_PATH, check_existing=True)
+        tex.image.colorspace_settings.name = "sRGB"
+        print(f"  BG PNG  : Custom background → {BACKGROUND_IMAGE_PATH}")
+    else:
+        print("  BG PNG  : Background image not found, using black")
+        bg.inputs["Color"].default_value = (0.0, 0.0, 0.0, 1)
+
+    tc = wn.new("ShaderNodeTexCoord")
+    mapping = wn.new("ShaderNodeMapping")
+
+    aspect = BG_IMAGE_WIDTH / BG_IMAGE_HEIGHT
+    mapping.inputs["Scale"].default_value = (aspect, 1.0, 1.0)
+
+    wl.new(tc.outputs["Window"], mapping.inputs["Vector"])
+    wl.new(mapping.outputs["Vector"], tex.inputs["Vector"])
+    wl.new(tex.outputs["Color"], bg.inputs["Color"])
+    wl.new(bg.outputs["Background"], out.inputs["Surface"])
+
+
+# ── 10. Render settings ────────────────────────────────────────────────────────
+
+def setup_render():
+    scene = bpy.context.scene
+    scene.render.engine          = 'CYCLES'
+    scene.cycles.samples         = 128
+    scene.cycles.use_denoising  = True
+    scene.render.resolution_x    = 1920
+    scene.render.resolution_y    = 1080
+    scene.render.resolution_percentage = 100
+
+
+# ── Main ─────────────────────────────────────────────────────────────────────
+
+def main():
+    save_dir = get_save_dir()
+
+    jupiter_tex = download_texture(JUPITER_TEXTURE_URL, JUPITER_TEXTURE_NAME, save_dir)
+    for moon in MOONS:
+        moon["texture_path"] = download_texture(moon["texture_url"], moon["texture_name"], save_dir)
+
+    clear_scene()
+
+    scene = bpy.context.scene
+    scene.frame_start = 1; scene.frame_end = ANIM_FRAMES; scene.render.fps = FPS
+
+    # Jupiter
+    jupiter_img = load_image(jupiter_tex, "sRGB")
+    jupiter = create_sphere("Jupiter", JUPITER_RADIUS_BU)
+    jupiter.data.materials.append(create_surface_material("Jupiter_Surface", jupiter_img, roughness=0.6))
+    animate_spin(jupiter)
+
+    # Slowest-orbiting moon (Callisto) sets the baseline of 1 loop; the others
+    # complete proportionally more loops in the same ANIM_FRAMES window, just
+    # like their real relative orbital speeds.
+    slowest_period = max(m["period_days"] for m in MOONS)
+
+    for moon in MOONS:
+        radius_bu = (moon["radius_km"] / SCALE_KM_PER_BU) * MOON_SIZE_EXAGGERATION
+        orbit_bu  = moon["orbit_km"] / SCALE_KM_PER_BU
+        loops     = slowest_period / moon["period_days"]
+
+        img = load_image(moon["texture_path"], "sRGB")
+        obj = create_sphere(moon["name"], radius_bu, location=(orbit_bu, 0, 0),
+                             segments=64, ring_count=32)
+        obj.data.materials.append(create_surface_material(f"{moon['name']}_Surface", img, roughness=0.95))
+
+        # All four Galilean moons are tidally locked to Jupiter: spin period == orbit period.
+        animate_spin(obj)
+        animate_orbit(obj, orbit_bu, loops=loops)
+
+    create_camera()
+    create_sun_lamp()
+    setup_world()
+    setup_render()
+
+
+main()

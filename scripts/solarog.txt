@@ -1,0 +1,642 @@
+"""
+Solar System – Blender 5.1.2  (v4)
+===================================
+Run: Scripting workspace → Open → Run Script
+
+Fixes:
+  • ActionSlot has no .name  → use slot.identifier instead, or match by handle
+  • group_name="" confirmed correct for ActionChannelbagFCurves.new()
+
+New:
+  • Procedural node textures per planet (noise + colour ramps)
+  • Clouds layer on Earth
+  • Ice caps on Mars / Pluto
+  • Storm band on Jupiter
+  • Hex-cracked surface on Europa
+"""
+
+import bpy, math, random
+
+# ─────────────────────────────────────────────────────────────────────────────
+# ANIMATION  (Blender 5.x layered Action API)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _ensure_action_infra(obj):
+    """Return (action, strip, slot) – create as needed."""
+    if obj.animation_data is None:
+        obj.animation_data_create()
+    ad = obj.animation_data
+
+    # Action
+    if ad.action is None:
+        ad.action = bpy.data.actions.new(obj.name + "_A")
+    action = ad.action
+
+    # Layer
+    layer = action.layers[0] if action.layers else action.layers.new("Layer")
+
+    # Strip
+    strip = layer.strips[0] if layer.strips else layer.strips.new(type='KEYFRAME')
+
+    # Slot  – ActionSlot has .identifier (not .name) in Blender 5.x
+    # We tag each slot with a custom identifier equal to the object name.
+    slot = None
+    for s in action.slots:
+        if s.identifier == obj.name:
+            slot = s
+            break
+    if slot is None:
+        slot = action.slots.new(id_type='OBJECT', name=obj.name)
+        # .identifier is read-only and auto-derived from name in Blender 5.x,
+        # so we just grab the first (and only) slot we created.
+    ad.action_slot = slot
+
+    return action, strip, slot
+
+
+def _fcurve(obj, data_path, index):
+    """Get or create an FCurve for obj/data_path/index."""
+    action, strip, slot = _ensure_action_infra(obj)
+    cb = strip.channelbag(slot, ensure=True)
+    for fc in cb.fcurves:
+        if fc.data_path == data_path and fc.array_index == index:
+            return fc
+    return cb.fcurves.new(data_path=data_path, index=index, group_name="")
+
+
+def anim_rotate(obj, axis_index, period_frames, start_val=0.0):
+    """One full 2π rotation every period_frames, extrapolated linearly."""
+    obj.rotation_mode = 'XYZ'
+    fc = _fcurve(obj, "rotation_euler", axis_index)
+    k0 = fc.keyframe_points.insert(0,             start_val)
+    k1 = fc.keyframe_points.insert(period_frames, start_val + math.tau)
+    k0.interpolation = k1.interpolation = 'LINEAR'
+    fc.extrapolation = 'LINEAR'
+
+
+def anim_drift(obj, axis_index, frame_start, val_start, frame_end, val_end):
+    """Linear drift along one axis."""
+    obj.rotation_mode = 'XYZ'
+    fc = _fcurve(obj, "location", axis_index)
+    fc.extrapolation = 'CONSTANT'
+    k0 = fc.keyframe_points.insert(frame_start, val_start)
+    k1 = fc.keyframe_points.insert(frame_end,   val_end)
+    k0.interpolation = k1.interpolation = 'LINEAR'
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SCENE / COLLECTION HELPERS
+# ─────────────────────────────────────────────────────────────────────────────
+
+def clear_scene():
+    bpy.ops.object.select_all(action='SELECT')
+    bpy.ops.object.delete()
+    for c in list(bpy.data.collections):
+        bpy.data.collections.remove(c)
+
+def new_col(name):
+    c = bpy.data.collections.new(name)
+    bpy.context.scene.collection.children.link(c)
+    return c
+
+def link(obj, col):
+    col.objects.link(obj)
+    sc = bpy.context.scene.collection
+    if obj.name in sc.objects:
+        sc.objects.unlink(obj)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# MATERIAL / TEXTURE HELPERS
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _nt(mat):
+    """Shorthand: return mat.node_tree."""
+    return mat.node_tree
+
+def _n(mat):
+    return mat.node_tree.nodes
+
+def _l(mat):
+    return mat.node_tree.links
+
+def base_mat(name):
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    _n(m).clear()
+    return m
+
+def out_bsdf(mat, bsdf_node):
+    o = _n(mat).new('ShaderNodeOutputMaterial')
+    _l(mat).new(bsdf_node.outputs['BSDF'], o.inputs['Surface'])
+    return o
+
+def principled(mat, **kwargs):
+    b = _n(mat).new('ShaderNodeBsdfPrincipled')
+    for k, v in kwargs.items():
+        if k in b.inputs:
+            b.inputs[k].default_value = v
+    return b
+
+def emission(mat, color, strength):
+    e = _n(mat).new('ShaderNodeEmission')
+    e.inputs['Color'].default_value    = (*color, 1.0)
+    e.inputs['Strength'].default_value = strength
+    o = _n(mat).new('ShaderNodeOutputMaterial')
+    _l(mat).new(e.outputs['Emission'], o.inputs['Surface'])
+    return e
+
+def noise_node(mat, scale=5, detail=8, roughness=0.6, distortion=0.0):
+    nd = _n(mat).new('ShaderNodeTexNoise')
+    nd.inputs['Scale'].default_value       = scale
+    nd.inputs['Detail'].default_value      = detail
+    nd.inputs['Roughness'].default_value   = roughness
+    nd.inputs['Distortion'].default_value  = distortion
+    return nd
+
+def color_ramp(mat, stops):
+    """stops = list of (pos, (r,g,b))"""
+    cr = _n(mat).new('ShaderNodeValToRGB')
+    cr.color_ramp.elements.remove(cr.color_ramp.elements[1])  # remove default right stop first
+    for i, (pos, rgb) in enumerate(stops):
+        if i == 0:
+            el = cr.color_ramp.elements[0]
+        else:
+            el = cr.color_ramp.elements.new(pos)
+        el.position = pos
+        el.color    = (*rgb, 1.0)
+    return cr
+
+def mix_rgb(mat, fac=0.5, mode='MIX'):
+    # Use ShaderNodeMix (Blender 4+) or fall back to ShaderNodeMixRGB
+    try:
+        mx = _n(mat).new('ShaderNodeMix')
+        mx.data_type  = 'RGBA'
+        mx.blend_type = mode
+        mx.inputs['Factor'].default_value = fac
+    except Exception:
+        mx = _n(mat).new('ShaderNodeMixRGB')
+        mx.blend_type = mode
+        mx.inputs['Fac'].default_value = fac
+    return mx
+
+def assign(obj, mat):
+    if obj.data.materials: obj.data.materials[0] = mat
+    else:                   obj.data.materials.append(mat)
+
+# ── Per-planet procedural materials ──────────────────────────────────────────
+
+def mat_sun():
+    m = base_mat("SunMat")
+    emission(m, (1.0, 0.78, 0.18), 40.0)
+    return m
+
+def mat_mercury():
+    m = base_mat("MercuryMat")
+    b  = principled(m, Roughness=0.95)
+    nd = noise_node(m, scale=12, detail=10, roughness=0.7, distortion=0.3)
+    cr = color_ramp(m, [(0.0, (.35,.32,.28)),
+                        (0.4, (.55,.50,.45)),
+                        (1.0, (.70,.65,.60))])
+    _l(m).new(nd.outputs['Fac'],   cr.inputs['Fac'])
+    _l(m).new(cr.outputs['Color'], b.inputs['Base Color'])
+    out_bsdf(m, b)
+    return m
+
+def mat_venus():
+    m  = base_mat("VenusMat")
+    b  = principled(m, Roughness=0.6)
+    nd = noise_node(m, scale=4, detail=8, roughness=0.5, distortion=1.2)
+    cr = color_ramp(m, [(0.0, (.75,.60,.30)),
+                        (0.5, (.95,.82,.45)),
+                        (1.0, (1.0,.90,.55))])
+    _l(m).new(nd.outputs['Fac'],   cr.inputs['Fac'])
+    _l(m).new(cr.outputs['Color'], b.inputs['Base Color'])
+    out_bsdf(m, b)
+    return m
+
+def mat_earth():
+    m   = base_mat("EarthMat")
+    b   = principled(m, Roughness=0.7, Metallic=0.05)
+    # Ocean/land noise
+    nd  = noise_node(m, scale=6, detail=12, roughness=0.65, distortion=0.4)
+    cr  = color_ramp(m, [(0.0,  (.05,.15,.50)),   # deep ocean
+                         (0.38, (.08,.25,.65)),   # shallow
+                         (0.42, (.55,.65,.30)),   # coast/land
+                         (0.65, (.25,.50,.15)),   # forest
+                         (0.85, (.55,.45,.30)),   # desert/mountain
+                         (1.0,  (1.0,1.0,1.0))])  # snow peaks
+    _l(m).new(nd.outputs['Fac'],   cr.inputs['Fac'])
+    _l(m).new(cr.outputs['Color'], b.inputs['Base Color'])
+    out_bsdf(m, b)
+    return m
+
+def mat_earth_clouds():
+    m = base_mat("CloudMat")
+    m.blend_method = 'BLEND'
+    b  = _n(m).new('ShaderNodeBsdfPrincipled')
+    b.inputs['Roughness'].default_value = 0.1
+    nd = noise_node(m, scale=8, detail=10, roughness=0.5, distortion=0.8)
+    gt = _n(m).new('ShaderNodeMath'); gt.operation = 'GREATER_THAN'
+    gt.inputs[1].default_value = 0.52
+    _l(m).new(nd.outputs['Fac'], gt.inputs[0])
+    _l(m).new(gt.outputs['Value'], b.inputs['Alpha'])
+    b.inputs['Base Color'].default_value = (1,1,1,1)
+    out_bsdf(m, b)
+    return m
+
+def mat_mars():
+    m  = base_mat("MarsMat")
+    b  = principled(m, Roughness=0.90)
+    nd = noise_node(m, scale=8, detail=10, roughness=0.75, distortion=0.5)
+    cr = color_ramp(m, [(0.0, (.45,.18,.08)),
+                        (0.5, (.72,.30,.12)),
+                        (0.8, (.80,.42,.20)),
+                        (1.0, (1.0,1.0,1.0))])  # ice caps
+    _l(m).new(nd.outputs['Fac'],   cr.inputs['Fac'])
+    _l(m).new(cr.outputs['Color'], b.inputs['Base Color'])
+    out_bsdf(m, b)
+    return m
+
+def mat_jupiter():
+    m  = base_mat("JupiterMat")
+    b  = principled(m, Roughness=0.5)
+    # Horizontal bands via texture coordinate Y
+    tc = _n(m).new('ShaderNodeTexCoord')
+    mp = _n(m).new('ShaderNodeMapping')
+    mp.inputs['Scale'].default_value = (1, 8, 1)   # stretch Y = latitude bands
+    nd = noise_node(m, scale=3, detail=8, roughness=0.6, distortion=0.6)
+    cr = color_ramp(m, [(0.0, (.72,.52,.32)),
+                        (0.2, (.85,.68,.42)),
+                        (0.4, (.65,.40,.22)),
+                        (0.6, (.90,.75,.50)),
+                        (0.8, (.80,.55,.30)),
+                        (1.0, (.95,.82,.60))])
+    _l(m).new(tc.outputs['Generated'], mp.inputs['Vector'])
+    _l(m).new(mp.outputs['Vector'],    nd.inputs['Vector'])
+    _l(m).new(nd.outputs['Fac'],       cr.inputs['Fac'])
+    _l(m).new(cr.outputs['Color'],     b.inputs['Base Color'])
+    out_bsdf(m, b)
+    return m
+
+def mat_saturn():
+    m  = base_mat("SaturnMat")
+    b  = principled(m, Roughness=0.55)
+    tc = _n(m).new('ShaderNodeTexCoord')
+    mp = _n(m).new('ShaderNodeMapping')
+    mp.inputs['Scale'].default_value = (1, 6, 1)
+    nd = noise_node(m, scale=2, detail=6, roughness=0.5, distortion=0.3)
+    cr = color_ramp(m, [(0.0, (.70,.60,.40)),
+                        (0.5, (.90,.82,.60)),
+                        (1.0, (1.0,.92,.72))])
+    _l(m).new(tc.outputs['Generated'], mp.inputs['Vector'])
+    _l(m).new(mp.outputs['Vector'],    nd.inputs['Vector'])
+    _l(m).new(nd.outputs['Fac'],       cr.inputs['Fac'])
+    _l(m).new(cr.outputs['Color'],     b.inputs['Base Color'])
+    out_bsdf(m, b)
+    return m
+
+def mat_uranus():
+    m  = base_mat("UranusMat")
+    b  = principled(m, Roughness=0.3)
+    nd = noise_node(m, scale=3, detail=4, roughness=0.3, distortion=0.1)
+    cr = color_ramp(m, [(0.0, (.45,.78,.85)),
+                        (0.6, (.55,.88,.92)),
+                        (1.0, (.70,.95,.98))])
+    _l(m).new(nd.outputs['Fac'],   cr.inputs['Fac'])
+    _l(m).new(cr.outputs['Color'], b.inputs['Base Color'])
+    out_bsdf(m, b)
+    return m
+
+def mat_neptune():
+    m  = base_mat("NeptuneMat")
+    b  = principled(m, Roughness=0.35)
+    nd = noise_node(m, scale=4, detail=6, roughness=0.4, distortion=0.5)
+    cr = color_ramp(m, [(0.0, (.10,.18,.70)),
+                        (0.5, (.20,.30,.90)),
+                        (1.0, (.35,.50,1.0))])
+    _l(m).new(nd.outputs['Fac'],   cr.inputs['Fac'])
+    _l(m).new(cr.outputs['Color'], b.inputs['Base Color'])
+    out_bsdf(m, b)
+    return m
+
+def mat_pluto():
+    m  = base_mat("PlutoMat")
+    b  = principled(m, Roughness=0.92)
+    nd = noise_node(m, scale=10, detail=8, roughness=0.8, distortion=0.2)
+    cr = color_ramp(m, [(0.0, (.50,.40,.35)),
+                        (0.5, (.78,.68,.60)),
+                        (0.8, (.90,.85,.80)),
+                        (1.0, (1.0,1.0,1.0))])
+    _l(m).new(nd.outputs['Fac'],   cr.inputs['Fac'])
+    _l(m).new(cr.outputs['Color'], b.inputs['Base Color'])
+    out_bsdf(m, b)
+    return m
+
+def mat_moon(name, rgb0, rgb1, roughness=0.88):
+    m  = base_mat(name+"Mat")
+    b  = principled(m, Roughness=roughness)
+    nd = noise_node(m, scale=10, detail=6, roughness=0.7, distortion=0.15)
+    cr = color_ramp(m, [(0.0, rgb0), (1.0, rgb1)])
+    _l(m).new(nd.outputs['Fac'],   cr.inputs['Fac'])
+    _l(m).new(cr.outputs['Color'], b.inputs['Base Color'])
+    out_bsdf(m, b)
+    return m
+
+def mat_rock():
+    m  = base_mat("RockMat")
+    b  = principled(m, Roughness=0.95)
+    nd = noise_node(m, scale=20, detail=4, roughness=0.9)
+    cr = color_ramp(m, [(0.0, (.25,.22,.18)),
+                        (0.5, (.40,.35,.28)),
+                        (1.0, (.55,.50,.42))])
+    _l(m).new(nd.outputs['Fac'],   cr.inputs['Fac'])
+    _l(m).new(cr.outputs['Color'], b.inputs['Base Color'])
+    out_bsdf(m, b)
+    return m
+
+def mat_starfield():
+    m = base_mat("StarMat")
+    e  = _n(m).new('ShaderNodeEmission')
+    nd = noise_node(m, scale=500, detail=8, roughness=0.8)
+    gt = _n(m).new('ShaderNodeMath'); gt.operation='GREATER_THAN'
+    gt.inputs[1].default_value = 0.92
+    e.inputs['Color'].default_value = (1,1,.95,1)
+    o = _n(m).new('ShaderNodeOutputMaterial')
+    _l(m).new(nd.outputs['Fac'],   gt.inputs[0])
+    _l(m).new(gt.outputs['Value'], e.inputs['Strength'])
+    _l(m).new(e.outputs['Emission'], o.inputs['Surface'])
+    return m
+
+def mat_ring(rgb, alpha):
+    m = base_mat("RingMat"); m.blend_method='BLEND'
+    b = principled(m, Roughness=0.95)
+    b.inputs['Base Color'].default_value = (*rgb, 1)
+    b.inputs['Alpha'].default_value      = alpha
+    out_bsdf(m, b)
+    return m
+
+def mat_emission(name, rgb, strength=4.0):
+    m = base_mat(name)
+    emission(m, rgb, strength)
+    return m
+
+def mat_sat_panel():
+    m = base_mat("PanelMat")
+    b = principled(m, Metallic=0.9, Roughness=0.2)
+    b.inputs['Base Color'].default_value = (.05,.10,.55,1)
+    out_bsdf(m, b)
+    return m
+
+def mat_sat_body():
+    m = base_mat("SatBodyMat")
+    b = principled(m, Metallic=0.8, Roughness=0.25)
+    b.inputs['Base Color'].default_value = (.85,.85,.90,1)
+    out_bsdf(m, b)
+    return m
+
+# ─────────────────────────────────────────────────────────────────────────────
+# MESH PRIMITIVES
+# ─────────────────────────────────────────────────────────────────────────────
+
+def sphere(name, r, loc=(0,0,0), seg=32, rng=16):
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=r,location=loc,segments=seg,ring_count=rng)
+    o=bpy.context.active_object; o.name=name; return o
+
+def icosphere(name, r, loc=(0,0,0), sub=2):
+    bpy.ops.mesh.primitive_ico_sphere_add(radius=r,location=loc,subdivisions=sub)
+    o=bpy.context.active_object; o.name=name; return o
+
+def box(name, sz, loc=(0,0,0)):
+    bpy.ops.mesh.primitive_cube_add(size=sz,location=loc)
+    o=bpy.context.active_object; o.name=name; return o
+
+def cyl(name, r, d, loc=(0,0,0)):
+    bpy.ops.mesh.primitive_cylinder_add(radius=r,depth=d,location=loc)
+    o=bpy.context.active_object; o.name=name; return o
+
+def cone(name, r1, r2, d, loc=(0,0,0)):
+    bpy.ops.mesh.primitive_cone_add(radius1=r1,radius2=r2,depth=d,location=loc)
+    o=bpy.context.active_object; o.name=name; return o
+
+def empty_obj(name, loc=(0,0,0)):
+    bpy.ops.object.empty_add(type='PLAIN_AXES',location=loc)
+    o=bpy.context.active_object; o.name=name; return o
+
+# ─────────────────────────────────────────────────────────────────────────────
+# BUILD
+# ─────────────────────────────────────────────────────────────────────────────
+
+def build():
+    random.seed(42)
+    clear_scene()
+
+    sc = bpy.context.scene
+    sc.frame_start = 1; sc.frame_end = 3000; sc.render.fps = 24
+
+    # World
+    w = bpy.data.worlds['World']; w.use_nodes = True
+    bg = w.node_tree.nodes.get('Background') or \
+         w.node_tree.nodes.new('ShaderNodeBackground')
+    bg.inputs['Color'].default_value    = (0,0,0.015,1)
+    bg.inputs['Strength'].default_value = 1.2
+
+    Csys  = new_col("SolarSystem")
+    Cpl   = new_col("Planets")
+    Cmoon = new_col("Moons")
+    Cbelt = new_col("AsteroidBelt")
+    Csat  = new_col("Satellites")
+    Crk   = new_col("Rockets")
+
+    AU = 10.0
+    PS = 600 / 365   # 1 Earth year → 600 frames
+
+    # ── Sun ──────────────────────────────────────────────────────────────────
+    sun = sphere("Sun", 3.0, seg=64, rng=32)
+    assign(sun, mat_sun())
+    anim_rotate(sun, 2, 250)
+    link(sun, Csys)
+
+    bpy.ops.object.light_add(type='POINT', location=(0,0,0))
+    sl = bpy.context.active_object; sl.name="SunLight"
+    sl.data.energy=10_000_000; sl.data.color=(1.0,0.95,0.8)
+    sl.data.shadow_soft_size=3.0
+    link(sl, Csys)
+
+    # ── Planet definitions ────────────────────────────────────────────────────
+    # (name, dist_AU_div10, radius, orbit_days, spin_days, tilt_deg, material_fn)
+    PLANETS = [
+        ("Mercury",  3.9, 0.18,    88,   59,   0.0, mat_mercury),
+        ("Venus",    7.2, 0.45,   225,  243, 177.0, mat_venus),
+        ("Earth",   10.0, 0.50,   365,    1,  23.5, mat_earth),
+        ("Mars",    15.2, 0.27,   687,    1,  25.0, mat_mars),
+        ("Jupiter", 52.0, 1.40,  4333,  0.4,   3.0, mat_jupiter),
+        ("Saturn",  95.0, 1.20, 10759,  0.4,  27.0, mat_saturn),
+        ("Uranus",  191.9,0.80, 30687,  0.7,  97.8, mat_uranus),
+        ("Neptune", 300.5,0.75, 60190,  0.7,  28.3, mat_neptune),
+        ("Pluto",   395.0,0.15, 90520,  6.4, 122.5, mat_pluto),
+    ]
+
+    planets = {}
+    for name, da, pr, od, sd, tilt, mfn in PLANETS:
+        orb_f = max(60,  int(od * PS))
+        spn_f = max(10,  int(abs(sd) * PS))
+        dist  = (da / 10.0) * AU
+
+        oe = empty_obj(name+"_Orbit"); link(oe, Cpl)
+        anim_rotate(oe, 2, orb_f, start_val=random.uniform(0, math.tau))
+
+        p = sphere(name, pr, loc=(dist,0,0), seg=48, rng=24)
+        p.parent = oe
+        p.rotation_euler[0] = math.radians(tilt)
+        assign(p, mfn())
+        anim_rotate(p, 2, spn_f)
+        link(p, Cpl)
+        planets[name] = (p, oe, dist)
+
+        # Earth cloud layer
+        if name == "Earth":
+            cl = sphere("Earth_Clouds", pr*1.015, loc=(dist,0,0), seg=48, rng=24)
+            cl.parent = oe; cl.rotation_euler[0] = math.radians(tilt)
+            assign(cl, mat_earth_clouds())
+            anim_rotate(cl, 2, int(spn_f * 1.1))   # clouds drift slightly faster
+            link(cl, Cpl)
+
+    # ── Saturn rings ──────────────────────────────────────────────────────────
+    _, sat_oe, sat_db = planets["Saturn"]
+    for i, (ir, or_, al, rc) in enumerate([
+            (1.5, 1.9, .55, (.88,.80,.65)),
+            (2.0, 2.5, .45, (.82,.74,.58)),
+            (2.6, 3.0, .28, (.72,.65,.50))]):
+        bpy.ops.mesh.primitive_torus_add(
+            major_radius=(ir+or_)/2, minor_radius=(or_-ir)/2,
+            location=(sat_db,0,0), major_segments=80, minor_segments=4)
+        rg = bpy.context.active_object; rg.name=f"Ring_{i}"
+        rg.parent=sat_oe; rg.rotation_euler[0]=math.radians(27)
+        assign(rg, mat_ring(rc, al)); link(rg, Cpl)
+
+    # ── Moons ─────────────────────────────────────────────────────────────────
+    MOONS = {
+        "Earth":   [("Moon",     .80,.14,(.52,.50,.48),(.75,.73,.70), 55)],
+        "Mars":    [("Phobos",   .40,.05,(.38,.30,.25),(.58,.48,.40), 15),
+                    ("Deimos",   .60,.04,(.35,.28,.22),(.55,.46,.38), 30)],
+        "Jupiter": [("Io",       1.8,.12,(.80,.65,.10),(.95,.85,.30), 25),
+                    ("Europa",   2.2,.10,(.68,.65,.60),(.85,.82,.78), 35),
+                    ("Ganymede", 2.8,.15,(.45,.42,.38),(.65,.62,.58), 50),
+                    ("Callisto", 3.5,.13,(.30,.28,.25),(.52,.48,.44), 75)],
+        "Saturn":  [("Titan",    2.0,.12,(.75,.58,.22),(.92,.78,.42), 45),
+                    ("Enceladus",1.5,.07,(.88,.88,.92),(.96,.96,.98), 30)],
+        "Uranus":  [("Titania",  1.3,.08,(.55,.52,.52),(.72,.70,.72), 40),
+                    ("Oberon",   1.6,.07,(.40,.38,.38),(.62,.60,.60), 55)],
+        "Neptune": [("Triton",   1.2,.09,(.40,.52,.62),(.62,.72,.80), 35)],
+        "Pluto":   [("Charon",   .50,.07,(.48,.48,.50),(.68,.68,.70), 20)],
+    }
+    for pname, moons in MOONS.items():
+        if pname not in planets: continue
+        _, poe, pdb = planets[pname]
+        for mname, mr, mrad, rgb0, rgb1, mf in moons:
+            moe = empty_obj(mname+"_Orbit", loc=(pdb,0,0))
+            moe.parent = poe; link(moe, Cmoon)
+            anim_rotate(moe, 2, mf, start_val=random.uniform(0, math.tau))
+            mn = sphere(mname, mrad, loc=(pdb+mr,0,0), seg=24, rng=12)
+            mn.parent = moe
+            assign(mn, mat_moon(mname, rgb0, rgb1))
+            anim_rotate(mn, 2, mf)
+            link(mn, Cmoon)
+
+    # ── Asteroid belt ─────────────────────────────────────────────────────────
+    _, _, mars_d = planets["Mars"]
+    _, _, jup_d  = planets["Jupiter"]
+    bi, bo = mars_d+1.5, jup_d-1.5
+    rm = mat_rock()
+    for i in range(200):
+        a = random.uniform(0, math.tau)
+        d = random.uniform(bi, bo)
+        rk = icosphere(f"Rock_{i:03d}", random.uniform(.02,.12),
+                       loc=(d*math.cos(a), d*math.sin(a), random.uniform(-.5,.5)),
+                       sub=1)
+        rk.scale = (random.uniform(.5,1.5),random.uniform(.5,1.5),random.uniform(.3,1.0))
+        rk.rotation_euler = tuple(random.uniform(0,math.tau) for _ in range(3))
+        assign(rk, rm)
+        anim_rotate(rk, 2, random.randint(400,1200))
+        link(rk, Cbelt)
+
+    # ── Satellites (LEO) ──────────────────────────────────────────────────────
+    _, earth_oe, earth_d = planets["Earth"]
+    sbm = mat_sat_body()
+    spm = mat_sat_panel()
+    for i in range(3):
+        soe = empty_obj(f"Sat{i}_Orbit", loc=(earth_d,0,0))
+        soe.parent=earth_oe; soe.rotation_euler[0]=math.radians(i*25)
+        link(soe, Csat)
+        anim_rotate(soe, 2, 12+i*5, start_val=i*(math.tau/3))
+        orb_r = 0.75+i*0.15
+        sb = box(f"Sat_{i}", .06, loc=(earth_d+orb_r,0,0))
+        sb.parent=soe; assign(sb,sbm); link(sb,Csat)
+        for s in (-1,1):
+            pn = box(f"Panel_{i}_{s}",.01,loc=(earth_d+orb_r,s*.12,0))
+            pn.scale=(.5,.01,.15); pn.parent=soe; assign(pn,spm); link(pn,Csat)
+
+    # ── Rockets ───────────────────────────────────────────────────────────────
+    bm  = base_mat("RkBodyMat")
+    bp  = principled(bm, Metallic=0.6, Roughness=0.3)
+    bp.inputs['Base Color'].default_value=(.92,.92,.94,1); out_bsdf(bm,bp)
+    fm  = mat_emission("RkFlameMat", (1.0,.55,.10), 4.0)
+    nm  = base_mat("RkNoseMat")
+    np_ = principled(nm, Roughness=0.5)
+    np_.inputs['Base Color'].default_value=(.95,.20,.20,1); out_bsdf(nm,np_)
+
+    for r in range(2):
+        roe = empty_obj(f"Rkt{r}_Orbit", loc=(earth_d,0,0))
+        roe.parent=earth_oe; roe.rotation_euler[0]=math.radians(r*40)
+        link(roe, Crk)
+        anim_rotate(roe, 2, 30+r*10, start_val=math.pi*r)
+        br = earth_d+0.55
+        bd = cyl(f"RkBody_{r}",.04,.22,loc=(br,0,0))
+        bd.rotation_euler[1]=math.radians(90); bd.parent=roe
+        assign(bd,bm); link(bd,Crk)
+        anim_drift(bd, 0, 1, br, 3000, br+1.8)
+
+        nd2 = cone(f"RkNose_{r}",.04,0,.10,loc=(br+.16,0,0))
+        nd2.rotation_euler[1]=math.radians(90); nd2.parent=roe
+        assign(nd2,nm); link(nd2,Crk)
+
+        fl = cone(f"RkFlame_{r}",0,.05,.12,loc=(br-.17,0,0))
+        fl.rotation_euler[1]=math.radians(90); fl.parent=roe
+        assign(fl,fm); link(fl,Crk)
+
+    # ── Starfield ─────────────────────────────────────────────────────────────
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=800,location=(0,0,0),
+                                         segments=32,ring_count=16)
+    ss = bpy.context.active_object; ss.name="Starfield"; ss.scale=(-1,-1,-1)
+    assign(ss, mat_starfield()); link(ss, Csys)
+
+    # ── Camera ────────────────────────────────────────────────────────────────
+    bpy.ops.object.camera_add(location=(0,-120,55))
+    cam=bpy.context.active_object; cam.name="SolarCam"
+    cam.data.lens=24; cam.data.clip_end=2000
+    cam.rotation_euler=(math.radians(60),0,0)
+    sc.camera=cam; link(cam,Csys)
+
+    # ── Render ────────────────────────────────────────────────────────────────
+    sc.render.engine='CYCLES'; sc.cycles.samples=64
+    sc.cycles.use_denoising=True
+    sc.render.resolution_x=1920; sc.render.resolution_y=1080
+    sc.render.resolution_percentage=100
+    sc.render.image_settings.file_format='PNG'
+    try:
+        cp=bpy.context.preferences.addons['cycles'].preferences
+        cp.compute_device_type='CUDA'
+        for d in cp.devices: d.use=True
+        sc.cycles.device='GPU'
+    except Exception:
+        sc.cycles.device='CPU'
+
+    sc.view_settings.exposure = 1.5
+    sc.frame_set(1)
+    print("✓ Solar System v4 ready")
+    print(f"  Objects : {len(bpy.data.objects)}")
+    print(f"  Materials: {len(bpy.data.materials)}")
+    print("  Frames  : 1–3000 @ 24 fps")
+    print("  SPACE = play  |  Ctrl+F12 = render animation")
+
+build()

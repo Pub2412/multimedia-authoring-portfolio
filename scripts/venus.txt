@@ -1,0 +1,206 @@
+"""
+Venus 3D Model — Blender 5.x  |  Local Texture Edition
+===================================================================
+Requires Blender 5.0 or newer.
+
+Background galaxy uses a CUSTOM PNG image (1980x1080).
+"""
+
+# ── Local Venus texture (set your own path) ───────────────────────────────────
+VENUS_TEXTURE_PATH = r"C:\Users\Lancelot\Documents\School Files\Y2T3\MMA\Solar_System\Planets\Venus\2k_venus_surface.jpg"
+
+# ── Scale & Animation ─────────────────────────────────────────────────────────
+SCALE_KM_PER_BU = 10_000
+VENUS_RADIUS_KM = 6_051.8
+ANIM_FRAMES     = 360
+FPS             = 24
+
+# ── Render / Camera ───────────────────────────────────────────────────────────
+CAMERA_DISTANCE = 10.0
+CAMERA_HEIGHT   = 2.8
+CAMERA_FOCAL_MM = 35.0
+
+# ── Custom background image (PNG) ─────────────────────────────────────────────
+BACKGROUND_IMAGE_PATH = r"C:\Users\Lancelot\Documents\School Files\Y2T3\MMA\Solar_System\Planets\Venus\bg.png"
+BACKGROUND_STRENGTH   = 1.5
+BG_IMAGE_WIDTH        = 1980
+BG_IMAGE_HEIGHT       = 1080
+
+# ─────────────────────────────────────────────────────────────────────────────
+
+import bpy
+import math
+import os
+from bpy_extras import anim_utils
+
+RADIUS_BU = VENUS_RADIUS_KM / SCALE_KM_PER_BU
+
+# ── 1. Load image ─────────────────────────────────────────────────────────────
+
+def load_image(filepath, colorspace="sRGB"):
+    if not filepath or not os.path.isfile(filepath):
+        print(f"  [ERR] Venus texture not found: {filepath}")
+        return None
+    img = bpy.data.images.load(filepath, check_existing=True)
+    img.colorspace_settings.name = colorspace
+    return img
+
+
+# ── 2. Clear scene ────────────────────────────────────────────────────────────
+
+def clear_scene():
+    bpy.ops.object.select_all(action='SELECT')
+    bpy.ops.object.delete(use_global=False)
+    for col in bpy.data.collections:
+        bpy.data.collections.remove(col)
+    bpy.ops.outliner.orphans_purge(do_recursive=True)
+
+
+# ── 3. Sphere ─────────────────────────────────────────────────────────────────
+
+def create_sphere(name="Venus", radius=RADIUS_BU):
+    bpy.ops.mesh.primitive_uv_sphere_add(
+        radius=radius, segments=128, ring_count=64, location=(0, 0, 0)
+    )
+    obj = bpy.context.active_object
+    obj.name = name
+    bpy.ops.object.shade_smooth()
+    sub = obj.modifiers.new("Subdivision", 'SUBSURF')
+    sub.levels = 2; sub.render_levels = 3
+    return obj
+
+
+# ── 4. Material ───────────────────────────────────────────────────────────────
+
+def create_venus_material(img_color):
+    mat   = bpy.data.materials.new("Venus_Surface")
+    mat.use_nodes = True
+    nodes = mat.node_tree.nodes
+    links = mat.node_tree.links
+    nodes.clear()
+
+    def N(t, loc):
+        n = nodes.new(t); n.location = loc; return n
+
+    out  = N("ShaderNodeOutputMaterial", (1000, 0))
+    bsdf = N("ShaderNodeBsdfPrincipled", (700, 0))
+    bsdf.inputs["Roughness"].default_value = 0.9
+    bsdf.inputs["Specular IOR Level"].default_value = 0.03
+
+    tex = N("ShaderNodeTexImage", (300, 0))
+    if img_color:
+        tex.image = img_color
+        links.new(tex.outputs["Color"], bsdf.inputs["Base Color"])
+
+    links.new(bsdf.outputs["BSDF"], out.inputs["Surface"])
+    return mat
+
+
+# ── 5. Rotation ───────────────────────────────────────────────────────────────
+
+def animate_rotation(obj):
+    scene = bpy.context.scene
+    scene.frame_start = 1; scene.frame_end = ANIM_FRAMES; scene.render.fps = FPS
+    obj.rotation_euler = (math.radians(177.4), 0, 0.0)  # Venus retrograde tilt
+    obj.keyframe_insert(data_path="rotation_euler", frame=1)
+    obj.rotation_euler[2] = math.tau
+    obj.keyframe_insert(data_path="rotation_euler", frame=ANIM_FRAMES)
+    ad = obj.animation_data
+    if ad and ad.action:
+        cb = anim_utils.action_get_channelbag_for_slot(ad.action, ad.action_slot)
+        if cb:
+            for fc in cb.fcurves:
+                for kp in fc.keyframe_points:
+                    kp.interpolation = 'LINEAR'
+
+
+# ── 6. Lighting ───────────────────────────────────────────────────────────────
+
+def create_lighting():
+    bpy.ops.object.light_add(type='SUN', location=(50, -50, 30))
+    sun = bpy.context.active_object
+    sun.name = "Sun_Light"
+    sun.data.energy = 3.5
+    sun.data.color = (1.0, 0.97, 0.90)
+    sun.data.angle = math.radians(0.5)
+
+
+# ── 7. Camera ─────────────────────────────────────────────────────────────────
+
+def create_camera():
+    bpy.ops.object.camera_add(location=(0, -CAMERA_DISTANCE, CAMERA_HEIGHT))
+    cam = bpy.context.active_object
+    cam.name = "Camera"
+    cam.rotation_euler = (math.radians(73), 0, 0)
+    cam.data.lens = CAMERA_FOCAL_MM
+    bpy.context.scene.camera = cam
+
+
+# ── 8. World / Custom PNG background with aspect fix ─────────────────────────
+
+def setup_world():
+    world = bpy.context.scene.world
+    if world is None:
+        world = bpy.data.worlds.new("World")
+        bpy.context.scene.world = world
+    world.use_nodes = True
+
+    wn = world.node_tree.nodes
+    wl = world.node_tree.links
+    wn.clear()
+
+    out = wn.new("ShaderNodeOutputWorld")
+    bg  = wn.new("ShaderNodeBackground")
+    bg.inputs["Strength"].default_value = BACKGROUND_STRENGTH
+
+    tex = wn.new("ShaderNodeTexImage")
+    if os.path.isfile(BACKGROUND_IMAGE_PATH):
+        tex.image = bpy.data.images.load(BACKGROUND_IMAGE_PATH, check_existing=True)
+        tex.image.colorspace_settings.name = "sRGB"
+        print(f"  BG PNG  : Custom background → {BACKGROUND_IMAGE_PATH}")
+    else:
+        print("  BG PNG  : Background image not found, using black")
+        bg.inputs["Color"].default_value = (0.0, 0.0, 0.0, 1)
+
+    tc = wn.new("ShaderNodeTexCoord")
+    mapping = wn.new("ShaderNodeMapping")
+
+    aspect = BG_IMAGE_WIDTH / BG_IMAGE_HEIGHT
+    mapping.inputs["Scale"].default_value = (aspect, 1.0, 1.0)
+
+    wl.new(tc.outputs["Window"], mapping.inputs["Vector"])
+    wl.new(mapping.outputs["Vector"], tex.inputs["Vector"])
+    wl.new(tex.outputs["Color"], bg.inputs["Color"])
+    wl.new(bg.outputs["Background"], out.inputs["Surface"])
+
+
+# ── 9. Render settings ───────────────────────────────────────────────────────
+
+def setup_render():
+    scene = bpy.context.scene
+    scene.render.engine          = 'CYCLES'
+    scene.cycles.samples         = 128
+    scene.cycles.use_denoising  = True
+    scene.render.resolution_x    = 1920
+    scene.render.resolution_y    = 1080
+    scene.render.resolution_percentage = 100
+
+
+# ── Main ──────────────────────────────────────────────────────────────────────
+
+def main():
+    clear_scene()
+
+    img_color = load_image(VENUS_TEXTURE_PATH, "sRGB")
+
+    venus = create_sphere("Venus", RADIUS_BU)
+    venus.data.materials.append(create_venus_material(img_color))
+    animate_rotation(venus)
+
+    create_lighting()
+    create_camera()
+    setup_world()
+    setup_render()
+
+
+main()

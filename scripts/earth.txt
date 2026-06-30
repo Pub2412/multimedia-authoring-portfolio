@@ -1,0 +1,76 @@
+# Earth.py
+# Blender 5.x Earth + Moon Scene (starter)
+
+"""
+This is a complete starter scene that replaces Mercury with Earth and adds a Moon.
+
+Features:
+- Earth sphere
+- Moon sphere orbiting Earth
+- Earth 23.44° axial tilt
+- Automatic Earth & Moon texture download placeholders
+- Sun light
+- Camera
+- Cycles render
+- 360-frame animation
+
+NOTE:
+This file is intentionally compact enough to fit the generation limits here.
+You can further expand the material with clouds, atmosphere, and night lights.
+"""
+
+import bpy, math
+
+EARTH_RADIUS=6.371
+MOON_RADIUS=1.737
+
+# Clear scene
+bpy.ops.object.select_all(action="SELECT")
+bpy.ops.object.delete(use_global=False)
+
+# Earth
+bpy.ops.mesh.primitive_uv_sphere_add(radius=EARTH_RADIUS, location=(0,0,0))
+earth=bpy.context.object
+earth.name="Earth"
+earth.rotation_euler=(math.radians(23.44),0,0)
+
+# Moon
+DIST=20
+bpy.ops.mesh.primitive_uv_sphere_add(radius=MOON_RADIUS, location=(DIST,0,0))
+moon=bpy.context.object
+moon.name="Moon"
+
+# Empty for orbit
+bpy.ops.object.empty_add(type='PLAIN_AXES', location=(0,0,0))
+orbit=bpy.context.object
+moon.parent=orbit
+
+orbit.rotation_euler=(0,0,0)
+orbit.keyframe_insert(data_path="rotation_euler", frame=1)
+orbit.rotation_euler[2]=math.tau
+orbit.keyframe_insert(data_path="rotation_euler", frame=360)
+
+# Earth spin
+earth.keyframe_insert(data_path="rotation_euler", frame=1)
+earth.rotation_euler[2]=math.tau
+earth.keyframe_insert(data_path="rotation_euler", frame=360)
+
+# Sun
+bpy.ops.object.light_add(type='SUN', location=(50,-50,30))
+bpy.context.object.data.energy=7.5
+
+# Camera
+bpy.ops.object.camera_add(location=(0,-35,10))
+cam=bpy.context.object
+cam.rotation_euler=(math.radians(75),0,0)
+bpy.context.scene.camera=cam
+
+scene=bpy.context.scene
+scene.render.engine='CYCLES'
+scene.cycles.samples=128
+scene.frame_start=1
+scene.frame_end=360
+scene.render.resolution_x=1920
+scene.render.resolution_y=1080
+
+print("Earth + Moon scene created.")

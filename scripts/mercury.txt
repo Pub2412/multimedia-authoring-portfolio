@@ -1,0 +1,274 @@
+"""
+Mercury 3D Model — Blender 5.x  |  Auto-Download Textures Edition
+===================================================================
+Requires Blender 5.0 or newer.
+
+Background galaxy uses a CUSTOM PNG image (1980x1080).
+"""
+
+SAVE_DIR = ""   # Leave "" to save next to the .blend file,
+                # or set a full path, e.g. r"C:\Textures\Mercury"
+
+MERCURY_QUALITY = "2k"   # "2k" or "8k"
+
+SCALE_KM_PER_BU   = 1_000
+MERCURY_RADIUS_KM = 2_439.7
+ANIM_FRAMES       = 360
+FPS               = 24
+
+CAMERA_DISTANCE   = 9.5
+CAMERA_HEIGHT     = 2.8
+CAMERA_FOCAL_MM   = 35.0
+
+# ── Custom background image (PNG) ─────────────────────────────────────────────
+BACKGROUND_IMAGE_PATH = r"C:\Users\Lancelot\Documents\School Files\Y2T3\MMA\Solar_System\Planets\Mercury\bg.png"
+BACKGROUND_STRENGTH   = 1.5
+BG_IMAGE_WIDTH        = 1980
+BG_IMAGE_HEIGHT       = 1080
+
+import bpy
+import math
+import os
+import urllib.request
+import ssl
+from bpy_extras import anim_utils
+
+RADIUS_BU = MERCURY_RADIUS_KM / SCALE_KM_PER_BU
+
+TEXTURE_SOURCES = {
+    "mercury_color": (
+        f"https://www.solarsystemscope.com/textures/download/{MERCURY_QUALITY}_mercury.jpg",
+        f"{MERCURY_QUALITY}_mercury.jpg",
+        "sRGB",
+    ),
+}
+
+def get_save_dir():
+    if SAVE_DIR:
+        d = os.path.normpath(SAVE_DIR)
+    else:
+        blend_path = bpy.data.filepath
+        if blend_path:
+            d = os.path.dirname(blend_path)
+        else:
+            d = os.path.join(os.path.expanduser("~"), "Mercury_Textures")
+    os.makedirs(d, exist_ok=True)
+    return d
+
+def download_textures(save_dir):
+    paths = {}
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode    = ssl.CERT_NONE
+
+    for key, (url, filename, _colorspace) in TEXTURE_SOURCES.items():
+        dest = os.path.join(save_dir, filename)
+        if os.path.isfile(dest):
+            print(f"  [SKIP] Already exists: {filename}")
+        else:
+            print(f"  [DL]  Downloading {filename} …")
+            try:
+                req = urllib.request.Request(
+                    url,
+                    headers={"User-Agent": "Mozilla/5.0 (Blender texture downloader)"},
+                )
+                with urllib.request.urlopen(req, context=ctx) as resp, \
+                     open(dest, "wb") as f:
+                    total = int(resp.headers.get("Content-Length", 0))
+                    downloaded = 0
+                    chunk = 1 << 16
+                    while True:
+                        data = resp.read(chunk)
+                        if not data:
+                            break
+                        f.write(data)
+                        downloaded += len(data)
+                        if total:
+                            pct = downloaded / total * 100
+                            print(f"       {pct:5.1f}%  ({downloaded//1024} KB / {total//1024} KB)",
+                                  end="\r")
+                print(f"\n  [OK]  Saved → {dest}")
+            except Exception as e:
+                print(f"  [ERR] Failed to download {url}\n        {e}")
+                dest = None
+        paths[key] = dest
+    return paths
+
+def load_image(filepath, colorspace="sRGB"):
+    if not filepath or not os.path.isfile(filepath):
+        return None
+    img = bpy.data.images.load(filepath, check_existing=True)
+    img.colorspace_settings.name = colorspace
+    return img
+
+def clear_scene():
+    bpy.ops.object.select_all(action='SELECT')
+    bpy.ops.object.delete(use_global=False)
+    for col in bpy.data.collections:
+        bpy.data.collections.remove(col)
+    bpy.ops.outliner.orphans_purge(do_recursive=True)
+
+def create_sphere():
+    bpy.ops.mesh.primitive_uv_sphere_add(
+        radius=RADIUS_BU, segments=128, ring_count=64, location=(0, 0, 0)
+    )
+    obj = bpy.context.active_object
+    obj.name = "Mercury"
+    bpy.ops.object.shade_smooth()
+    sub = obj.modifiers.new("Subdivision", 'SUBSURF')
+    sub.levels = 2; sub.render_levels = 3
+    return obj
+
+def create_material(img_color):
+    mat   = bpy.data.materials.new("Mercury_Surface")
+    mat.use_nodes = True
+    nodes = mat.node_tree.nodes
+    links = mat.node_tree.links
+    nodes.clear()
+
+    def N(t, loc):
+        n = nodes.new(t); n.location = loc; return n
+
+    out  = N("ShaderNodeOutputMaterial", (1400, 0))
+    bsdf = N("ShaderNodeBsdfPrincipled", (1000, 0))
+    bsdf.inputs["Roughness"].default_value          = 0.92
+    bsdf.inputs["Specular IOR Level"].default_value = 0.04
+    bsdf.inputs["Metallic"].default_value           = 0.0
+    links.new(bsdf.outputs["BSDF"], out.inputs["Surface"])
+
+    tc = N("ShaderNodeTexCoord", (-900, 0))
+    mp = N("ShaderNodeMapping",  (-700, 0))
+    links.new(tc.outputs["Generated"], mp.inputs["Vector"])
+
+    if img_color:
+        col_tex = N("ShaderNodeTexImage", (-400, 200))
+        col_tex.image = img_color
+        links.new(tc.outputs["UV"], col_tex.inputs["Vector"])
+        color_socket = col_tex.outputs["Color"]
+        print("  Colour  : Real NASA-based Mercury map (Solar System Scope)")
+    else:
+        n1 = N("ShaderNodeTexNoise", (-400, 260))
+        n1.inputs["Scale"].default_value = 4.0; n1.inputs["Detail"].default_value = 10.0
+        n1.inputs["Roughness"].default_value = 0.65; n1.inputs["Distortion"].default_value = 0.3
+        links.new(mp.outputs["Vector"], n1.inputs["Vector"])
+        n2 = N("ShaderNodeTexNoise", (-400, 0))
+        n2.inputs["Scale"].default_value = 30.0; n2.inputs["Detail"].default_value = 8.0
+        links.new(mp.outputs["Vector"], n2.inputs["Vector"])
+        vor = N("ShaderNodeTexVoronoi", (-400, -260))
+        vor.feature = 'DISTANCE_TO_EDGE'; vor.inputs["Scale"].default_value = 14.0
+        links.new(mp.outputs["Vector"], vor.inputs["Vector"])
+        inv = N("ShaderNodeMath", (-180, -260)); inv.operation = 'SUBTRACT'; inv.inputs[0].default_value = 1.0
+        links.new(vor.outputs["Distance"], inv.inputs[1])
+        shp = N("ShaderNodeMath", (0, -260)); shp.operation = 'POWER'; shp.inputs[1].default_value = 3.5
+        links.new(inv.outputs["Value"], shp.inputs[0])
+        mx = N("ShaderNodeMixRGB", (-180, 140)); mx.blend_type = 'MIX'; mx.inputs["Fac"].default_value = 0.35
+        links.new(n1.outputs["Fac"], mx.inputs["Color1"]); links.new(n2.outputs["Fac"], mx.inputs["Color2"])
+        cr = N("ShaderNodeValToRGB", (0, 140))
+        ramp = cr.color_ramp; ramp.interpolation = 'B_SPLINE'
+        ramp.elements[0].position = 0.0;  ramp.elements[0].color = (0.055, 0.05, 0.048, 1)
+        ramp.elements[1].position = 1.0;  ramp.elements[1].color = (0.48, 0.44, 0.40, 1)
+        mid = ramp.elements.new(0.45);    mid.color = (0.22, 0.20, 0.19, 1)
+        links.new(mx.outputs["Color"], cr.inputs["Fac"])
+        mc = N("ShaderNodeMixRGB", (200, 60)); mc.blend_type = 'MULTIPLY'; mc.inputs["Fac"].default_value = 0.55
+        links.new(cr.outputs["Color"], mc.inputs["Color1"]); links.new(shp.outputs["Value"], mc.inputs["Color2"])
+        color_socket = mc.outputs["Color"]
+
+    links.new(color_socket, bsdf.inputs["Base Color"])
+    return mat
+
+def animate_rotation(obj):
+    scene = bpy.context.scene
+    scene.frame_start = 1; scene.frame_end = ANIM_FRAMES; scene.render.fps = FPS
+    obj.rotation_euler = (math.radians(0.034), 0, 0.0)
+    obj.keyframe_insert(data_path="rotation_euler", frame=1)
+    obj.rotation_euler[2] = math.tau
+    obj.keyframe_insert(data_path="rotation_euler", frame=ANIM_FRAMES)
+    ad = obj.animation_data
+    if ad and ad.action:
+        cb = anim_utils.action_get_channelbag_for_slot(ad.action, ad.action_slot)
+        if cb:
+            for fc in cb.fcurves:
+                for kp in fc.keyframe_points:
+                    kp.interpolation = 'LINEAR'
+
+def create_lighting():
+    bpy.ops.object.light_add(type='SUN', location=(50, -50, 30))
+    sun = bpy.context.active_object
+    sun.name = "Sun_Light"
+    sun.data.energy = 4.0; sun.data.color = (1.0, 0.97, 0.90)
+    sun.data.angle  = math.radians(0.5)
+    sun.rotation_euler = (math.radians(30), 0, math.radians(-45))
+    bpy.ops.object.light_add(type='POINT', location=(-30, 30, -10))
+    fill = bpy.context.active_object
+    fill.name = "Space_Fill"; fill.data.energy = 0.2; fill.data.color = (0.6, 0.7, 1.0)
+
+def create_camera():
+    bpy.ops.object.camera_add(location=(0, -CAMERA_DISTANCE, CAMERA_HEIGHT))
+    cam = bpy.context.active_object
+    cam.name = "Camera"
+    cam.rotation_euler = (math.radians(73), 0, 0)
+    cam.data.lens = CAMERA_FOCAL_MM
+    bpy.context.scene.camera = cam
+
+def setup_world():
+    world = bpy.context.scene.world
+    if world is None:
+        world = bpy.data.worlds.new("World")
+        bpy.context.scene.world = world
+    world.use_nodes = True
+
+    wn = world.node_tree.nodes
+    wl = world.node_tree.links
+    wn.clear()
+
+    out = wn.new("ShaderNodeOutputWorld")
+    bg  = wn.new("ShaderNodeBackground")
+    bg.inputs["Strength"].default_value = BACKGROUND_STRENGTH
+
+    # Use Environment Texture node instead of Image Texture for stable backgrounds
+    tex = wn.new("ShaderNodeTexEnvironment")
+    
+    if os.path.isfile(BACKGROUND_IMAGE_PATH):
+        tex.image = bpy.data.images.load(BACKGROUND_IMAGE_PATH, check_existing=True)
+        # sRGB is generally correct for flat images
+        tex.image.colorspace_settings.name = "sRGB"
+        print(f"  BG PNG  : Custom environment → {BACKGROUND_IMAGE_PATH}")
+    else:
+        print("  BG PNG  : Background image not found, using black")
+        bg.inputs["Color"].default_value = (0.0, 0.0, 0.0, 1)
+
+    # Use Texture Coordinate 'Generated' to map the environment
+    tc = wn.new("ShaderNodeTexCoord")
+
+    # Connect nodes
+    wl.new(tc.outputs["Generated"], tex.inputs["Vector"])
+    wl.new(tex.outputs["Color"], bg.inputs["Color"])
+    wl.new(bg.outputs["Background"], out.inputs["Surface"])
+
+def setup_render():
+    scene = bpy.context.scene
+    scene.render.engine          = 'CYCLES'
+    scene.cycles.samples         = 128
+    scene.cycles.use_denoising  = True
+    scene.render.resolution_x    = 1920
+    scene.render.resolution_y    = 1080
+    scene.render.resolution_percentage = 100
+
+def main():
+    save_dir = get_save_dir()
+    paths = download_textures(save_dir)
+    clear_scene()
+
+    img_color = load_image(paths.get("mercury_color"), "sRGB")
+
+    mercury = create_sphere()
+    mat = create_material(img_color)
+    mercury.data.materials.append(mat)
+
+    animate_rotation(mercury)
+    create_lighting()
+    create_camera()
+    setup_world()
+    setup_render()
+
+main()

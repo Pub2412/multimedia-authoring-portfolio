@@ -1,0 +1,400 @@
+"""
+Pluto + Charon + Moons 3D Model — Blender 5.x  |  Auto-Download Textures Edition
+===================================================================
+Requires Blender 5.0 or newer.
+
+Models the Pluto–Charon system and its four small outer moons — Styx, Nix,
+Kerberos, and Hydra.
+
+UNIQUE FEATURE: Pluto isn't really a single planet with moons orbiting it —
+Pluto and Charon form a true binary (double dwarf-planet) system. Charon is
+about half Pluto's diameter, and their shared barycenter actually sits
+OUTSIDE Pluto's surface (~2,125 km from Pluto's center, vs Pluto's own
+1,188 km radius). So instead of parenting everything to a fixed Pluto like
+every other script in this series, this one puts a "Barycenter" empty at
+the origin, and BOTH Pluto and Charon orbit it — 180° out of phase from
+each other, locked to the same 6.39-day period, since the pair is mutually
+tidally locked (each always shows the same face to the other).
+
+The four small moons (discovered by Hubble and New Horizons, all much
+smaller than Charon) orbit that same barycenter further out. New Horizons
+also found that — unlike Charon — these small moons tumble chaotically
+rather than rotating in sync with their orbits, so their spin periods below
+are deliberately NOT matched to their orbital periods, unlike every tidally
+locked moon in the rest of this series.
+
+Background galaxy uses a CUSTOM PNG image.
+Texture source: NASA / New Horizons (public domain).
+"""
+
+SAVE_DIR = ""   # Leave "" to save next to the .blend file,
+                # or set a full path, e.g. r"C:\Textures\Pluto"
+
+# ── Texture quality ────────────────────────────────────────────────────────
+# NOTE: verify these URLs resolve before running — Wikimedia/NASA file
+# hashes are not predictable. The small moons in particular have no good
+# resolved imagery (New Horizons saw them as little more than a few pixels),
+# so their "textures" are just flat NASA-estimated grey/brown swatches —
+# if a download fails, any small grey JPG dropped in with the matching
+# filename below will do.
+PLUTO_TEXTURE_URL   = "https://upload.wikimedia.org/wikipedia/commons/8/86/Pluto_New_Horizons_global_mosaic.jpg"
+PLUTO_TEXTURE_NAME  = "pluto.jpg"
+
+CHARON_TEXTURE_URL  = "https://upload.wikimedia.org/wikipedia/commons/0/0b/Charon_in_True_Color_-_High-Res.jpg"
+CHARON_TEXTURE_NAME = "charon.jpg"
+
+# ── Pluto–Charon binary geometry ────────────────────────────────────────────
+PLUTO_RADIUS_KM    = 1_188.3
+CHARON_RADIUS_KM   = 606.0
+CENTER_SEPARATION_KM = 19_591    # distance between Pluto's and Charon's centers
+MUTUAL_ORBIT_DAYS  = 6.387        # both bodies share this period — mutual tidal lock
+
+# Barycenter offset from Pluto's center, derived from the Pluto:Charon mass
+# ratio (~8.7:1 by mass). This is what makes Pluto visibly "wobble" around
+# a point outside itself instead of sitting still at the origin.
+CHARON_MASS_FRACTION = 1.586e21 / (1.303e22 + 1.586e21)   # Charon_mass / (Pluto_mass + Charon_mass)
+PLUTO_ORBIT_RADIUS_KM  = CENTER_SEPARATION_KM * CHARON_MASS_FRACTION
+CHARON_ORBIT_RADIUS_KM = CENTER_SEPARATION_KM - PLUTO_ORBIT_RADIUS_KM
+
+# ── Small moons (orbit distances given from the system barycenter; their
+# offset from Pluto's own orbit radius is negligible at this scale) ────────
+MOONS = [
+    {
+        "name": "Styx", "radius_km": 5.0, "orbit_km": 42_656, "spin_days": 3.24,
+        "texture_url": "https://upload.wikimedia.org/wikipedia/commons/4/47/Styx_moon.png",
+        "texture_name": "styx.jpg",
+    },
+    {
+        "name": "Nix", "radius_km": 22.5, "orbit_km": 48_694, "spin_days": 1.829,
+        "texture_url": "https://upload.wikimedia.org/wikipedia/commons/2/2d/Nix_-_2015-07-13.png",
+        "texture_name": "nix.jpg",
+    },
+    {
+        "name": "Kerberos", "radius_km": 6.5, "orbit_km": 57_783, "spin_days": 5.33,
+        "texture_url": "https://upload.wikimedia.org/wikipedia/commons/c/c0/Kerberos_-_2015-10-22.png",
+        "texture_name": "kerberos.jpg",
+    },
+    {
+        "name": "Hydra", "radius_km": 25.5, "orbit_km": 64_738, "spin_days": 0.4295,
+        "texture_url": "https://upload.wikimedia.org/wikipedia/commons/9/95/Hydra-2015-10-21.png",
+        "texture_name": "hydra.jpg",
+    },
+]
+
+# ── Scale & Animation ───────────────────────────────────────────────────────
+SCALE_KM_PER_BU = 1_000      # 1 Blender Unit = 1,000 km — the whole system fits in ~65 BU
+
+MOON_SIZE_EXAGGERATION = 15.0   # the small moons are only a few km across — invisible otherwise
+
+ANIM_FRAMES = 360
+FPS         = 24
+
+# ── Render / Camera ──────────────────────────────────────────────────────────
+CAMERA_DISTANCE = 90.0
+CAMERA_HEIGHT   = 30.0
+CAMERA_FOCAL_MM = 35.0
+
+# ── Custom background image (PNG) ────────────────────────────────────────────
+BACKGROUND_IMAGE_PATH = r"C:\Users\Lancelot\Documents\School Files\Y2T3\MMA\Solar_System\Planets\Pluto\bg.png"
+BACKGROUND_STRENGTH    = 1.5
+BG_IMAGE_WIDTH         = 1980
+BG_IMAGE_HEIGHT        = 1080
+
+# ─────────────────────────────────────────────────────────────────────────
+
+import bpy
+import math
+import os
+import urllib.request
+import ssl
+from bpy_extras import anim_utils
+
+PLUTO_RADIUS_BU         = PLUTO_RADIUS_KM / SCALE_KM_PER_BU
+CHARON_RADIUS_BU        = CHARON_RADIUS_KM / SCALE_KM_PER_BU
+PLUTO_ORBIT_RADIUS_BU   = PLUTO_ORBIT_RADIUS_KM / SCALE_KM_PER_BU
+CHARON_ORBIT_RADIUS_BU  = CHARON_ORBIT_RADIUS_KM / SCALE_KM_PER_BU
+
+
+# ── 0. Resolve save directory ───────────────────────────────────────────────
+
+def get_save_dir():
+    if SAVE_DIR:
+        d = os.path.normpath(SAVE_DIR)
+    else:
+        blend_path = bpy.data.filepath
+        if blend_path:
+            d = os.path.dirname(blend_path)
+        else:
+            d = os.path.join(os.path.expanduser("~"), "Pluto_Textures")
+    os.makedirs(d, exist_ok=True)
+    return d
+
+
+# ── 1. Download texture ─────────────────────────────────────────────────────
+
+def download_texture(url, name, save_dir):
+    dest = os.path.join(save_dir, name)
+
+    if os.path.isfile(dest):
+        print(f"  [SKIP] Already exists: {name}")
+        return dest
+
+    print(f"  [DL]  Downloading {name} …")
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode    = ssl.CERT_NONE
+
+    try:
+        req = urllib.request.Request(
+            url, headers={"User-Agent": "Mozilla/5.0 (Blender texture downloader)"},
+        )
+        with urllib.request.urlopen(req, context=ctx) as resp, open(dest, "wb") as f:
+            total = int(resp.headers.get("Content-Length", 0))
+            downloaded = 0
+            chunk = 1 << 16
+            while True:
+                data = resp.read(chunk)
+                if not data:
+                    break
+                f.write(data)
+                downloaded += len(data)
+                if total:
+                    pct = downloaded / total * 100
+                    print(f"       {pct:5.1f}%  ({downloaded//1024} KB / {total//1024} KB)",
+                          end="\r")
+        print(f"\n  [OK]  Saved → {dest}")
+        return dest
+    except Exception as e:
+        print(f"  [ERR] Failed to download {url}\n        {e}")
+        return None
+
+
+# ── 2. Load image ───────────────────────────────────────────────────────────
+
+def load_image(filepath, colorspace="sRGB"):
+    if not filepath or not os.path.isfile(filepath):
+        return None
+    img = bpy.data.images.load(filepath, check_existing=True)
+    img.colorspace_settings.name = colorspace
+    return img
+
+
+# ── 3. Clear scene ──────────────────────────────────────────────────────────
+
+def clear_scene():
+    bpy.ops.object.select_all(action='SELECT')
+    bpy.ops.object.delete(use_global=False)
+    for col in bpy.data.collections:
+        bpy.data.collections.remove(col)
+    bpy.ops.outliner.orphans_purge(do_recursive=True)
+
+
+# ── 4. Sphere ────────────────────────────────────────────────────────────────
+
+def create_sphere(name, radius, location=(0, 0, 0), segments=128, ring_count=64):
+    bpy.ops.mesh.primitive_uv_sphere_add(
+        radius=radius, segments=segments, ring_count=ring_count, location=location
+    )
+    obj = bpy.context.active_object
+    obj.name = name
+    bpy.ops.object.shade_smooth()
+    sub = obj.modifiers.new("Subdivision", 'SUBSURF')
+    sub.levels = 2; sub.render_levels = 3
+    return obj
+
+
+# ── 5. Materials (non-emissive, lit surfaces) ────────────────────────────────
+
+def create_surface_material(name, img_color, roughness=0.95):
+    mat   = bpy.data.materials.new(name)
+    mat.use_nodes = True
+    nodes = mat.node_tree.nodes
+    links = mat.node_tree.links
+    nodes.clear()
+
+    def N(t, loc):
+        n = nodes.new(t); n.location = loc; return n
+
+    out  = N("ShaderNodeOutputMaterial", (1000, 0))
+    bsdf = N("ShaderNodeBsdfPrincipled", (700, 0))
+    bsdf.inputs["Roughness"].default_value = roughness
+
+    tex = N("ShaderNodeTexImage", (300, 0))
+    if img_color:
+        tex.image = img_color
+        links.new(tex.outputs["Color"], bsdf.inputs["Base Color"])
+    else:
+        # No usable texture (common for the tiny outer moons) — fall back
+        # to a flat icy-grey colour rather than leaving it default white.
+        bsdf.inputs["Base Color"].default_value = (0.55, 0.53, 0.5, 1.0)
+
+    links.new(bsdf.outputs["BSDF"], out.inputs["Surface"])
+    return mat
+
+
+# ── 6. Axial rotation & orbit ─────────────────────────────────────────────────
+
+def animate_spin(obj, period_loops, frame_start=1, frame_end=ANIM_FRAMES):
+    """period_loops: how many full spins to complete over ANIM_FRAMES,
+    relative to the slowest body in the scene (see main())."""
+    obj.rotation_euler = (0, 0, 0.0)
+    obj.keyframe_insert(data_path="rotation_euler", frame=frame_start)
+    obj.rotation_euler[2] = math.tau * period_loops
+    obj.keyframe_insert(data_path="rotation_euler", frame=frame_end)
+    _linearize(obj)
+
+
+def animate_orbit(obj, radius, loops=1, phase=0.0, frame_start=1, frame_end=ANIM_FRAMES):
+    """Animates obj on a circular orbit of given radius around the world
+    origin (the barycenter), starting at angle `phase`."""
+    steps = 4 * max(1, round(loops))
+    for i in range(steps + 1):
+        frame = frame_start + (frame_end - frame_start) * (i / steps)
+        angle = phase + math.tau * loops * (i / steps)
+        obj.location = (radius * math.cos(angle), radius * math.sin(angle), obj.location.z)
+        obj.keyframe_insert(data_path="location", frame=frame)
+    _linearize(obj)
+
+
+def _linearize(obj):
+    ad = obj.animation_data
+    if ad and ad.action:
+        cb = anim_utils.action_get_channelbag_for_slot(ad.action, ad.action_slot)
+        if cb:
+            for fc in cb.fcurves:
+                for kp in fc.keyframe_points:
+                    kp.interpolation = 'LINEAR'
+
+
+# ── 7. Camera ──────────────────────────────────────────────────────────────────
+
+def create_camera():
+    bpy.ops.object.camera_add(location=(0, -CAMERA_DISTANCE, CAMERA_HEIGHT))
+    cam = bpy.context.active_object
+    cam.name = "Camera"
+    cam.rotation_euler = (math.radians(73), 0, 0)
+    cam.data.lens = CAMERA_FOCAL_MM
+    bpy.context.scene.camera = cam
+
+
+# ── 8. Sun lamp (Pluto is not self-illuminating) ────────────────────────────
+
+def create_sun_lamp():
+    bpy.ops.object.light_add(type='SUN', location=(-80, -80, 80))
+    lamp = bpy.context.active_object
+    lamp.name = "Sunlight"
+    lamp.data.energy = 0.3   # Pluto sits ~39.5 AU out — the dimmest sunlight in this whole series
+    lamp.rotation_euler = (math.radians(55), 0, math.radians(35))
+    return lamp
+
+
+# ── 9. World / Custom PNG background with aspect fix ────────────────────────
+
+def setup_world():
+    world = bpy.context.scene.world
+    if world is None:
+        world = bpy.data.worlds.new("World")
+        bpy.context.scene.world = world
+    world.use_nodes = True
+
+    wn = world.node_tree.nodes
+    wl = world.node_tree.links
+    wn.clear()
+
+    out = wn.new("ShaderNodeOutputWorld")
+    bg  = wn.new("ShaderNodeBackground")
+    bg.inputs["Strength"].default_value = BACKGROUND_STRENGTH
+
+    tex = wn.new("ShaderNodeTexImage")
+    if os.path.isfile(BACKGROUND_IMAGE_PATH):
+        tex.image = bpy.data.images.load(BACKGROUND_IMAGE_PATH, check_existing=True)
+        tex.image.colorspace_settings.name = "sRGB"
+        print(f"  BG PNG  : Custom background → {BACKGROUND_IMAGE_PATH}")
+    else:
+        print("  BG PNG  : Background image not found, using black")
+        bg.inputs["Color"].default_value = (0.0, 0.0, 0.0, 1)
+
+    tc = wn.new("ShaderNodeTexCoord")
+    mapping = wn.new("ShaderNodeMapping")
+
+    aspect = BG_IMAGE_WIDTH / BG_IMAGE_HEIGHT
+    mapping.inputs["Scale"].default_value = (aspect, 1.0, 1.0)
+
+    wl.new(tc.outputs["Window"], mapping.inputs["Vector"])
+    wl.new(mapping.outputs["Vector"], tex.inputs["Vector"])
+    wl.new(tex.outputs["Color"], bg.inputs["Color"])
+    wl.new(bg.outputs["Background"], out.inputs["Surface"])
+
+
+# ── 10. Render settings ───────────────────────────────────────────────────────
+
+def setup_render():
+    scene = bpy.context.scene
+    scene.render.engine          = 'CYCLES'
+    scene.cycles.samples         = 128
+    scene.cycles.use_denoising  = True
+    scene.render.resolution_x    = 1920
+    scene.render.resolution_y    = 1080
+    scene.render.resolution_percentage = 100
+
+
+# ── Main ─────────────────────────────────────────────────────────────────────
+
+def main():
+    save_dir = get_save_dir()
+
+    pluto_tex  = download_texture(PLUTO_TEXTURE_URL, PLUTO_TEXTURE_NAME, save_dir)
+    charon_tex = download_texture(CHARON_TEXTURE_URL, CHARON_TEXTURE_NAME, save_dir)
+    for moon in MOONS:
+        moon["texture_path"] = download_texture(moon["texture_url"], moon["texture_name"], save_dir)
+
+    clear_scene()
+
+    scene = bpy.context.scene
+    scene.frame_start = 1; scene.frame_end = ANIM_FRAMES; scene.render.fps = FPS
+
+    # Pluto and Charon both orbit the shared barycenter at the origin,
+    # 180° apart, on the same 6.39-day period — this is what makes it a
+    # true binary system rather than a planet-with-a-moon.
+    pluto_img = load_image(pluto_tex, "sRGB")
+    pluto = create_sphere("Pluto", PLUTO_RADIUS_BU, location=(PLUTO_ORBIT_RADIUS_BU, 0, 0))
+    pluto.data.materials.append(create_surface_material("Pluto_Surface", pluto_img))
+    animate_spin(pluto, period_loops=1)   # mutually tidally locked: spin period == orbit period
+    animate_orbit(pluto, PLUTO_ORBIT_RADIUS_BU, loops=1, phase=0.0)
+
+    charon_img = load_image(charon_tex, "sRGB")
+    charon = create_sphere("Charon", CHARON_RADIUS_BU, location=(-CHARON_ORBIT_RADIUS_BU, 0, 0))
+    charon.data.materials.append(create_surface_material("Charon_Surface", charon_img))
+    animate_spin(charon, period_loops=1)  # same mutual lock, always facing Pluto
+    animate_orbit(charon, CHARON_ORBIT_RADIUS_BU, loops=1, phase=math.pi)
+
+    # Small moons orbit the same barycenter, further out. Real New Horizons
+    # data shows these four tumble chaotically rather than rotating in sync
+    # with their orbits — modelled here simply by giving each one a spin
+    # rate unrelated to its orbital rate, unlike every tidally locked moon
+    # elsewhere in this series.
+    slowest_period_days = 38.20  # Hydra's real orbital period — the slowest in the system
+
+    for moon in MOONS:
+        radius_bu = (moon["radius_km"] / SCALE_KM_PER_BU) * MOON_SIZE_EXAGGERATION
+        orbit_bu  = moon["orbit_km"] / SCALE_KM_PER_BU
+        orbit_loops = slowest_period_days / {
+            "Styx": 20.16, "Nix": 24.85, "Kerberos": 32.17, "Hydra": 38.20,
+        }[moon["name"]]
+        spin_loops  = slowest_period_days / moon["spin_days"]  # chaotic — not tied to orbit_loops
+
+        img = load_image(moon["texture_path"], "sRGB")
+        obj = create_sphere(moon["name"], radius_bu, location=(orbit_bu, 0, 0),
+                             segments=32, ring_count=16)
+        obj.data.materials.append(create_surface_material(f"{moon['name']}_Surface", img))
+
+        animate_spin(obj, period_loops=spin_loops)
+        animate_orbit(obj, orbit_bu, loops=orbit_loops)
+
+    create_camera()
+    create_sun_lamp()
+    setup_world()
+    setup_render()
+
+
+main()

@@ -447,6 +447,10 @@
         .album-art {
             position: relative;
             min-height: 420px;
+            display: grid;
+            grid-template-columns: minmax(180px, 1fr) minmax(180px, 0.9fr);
+            gap: 18px;
+            align-items: center;
             border-radius: 28px;
             overflow: hidden;
             background:
@@ -457,97 +461,49 @@
             padding: 24px;
         }
 
-        .album-art::before {
-            content: "THRILLER";
-            position: absolute;
-            inset: 20px auto auto 22px;
-            font-family: "Bebas Neue", sans-serif;
-            letter-spacing: 0.18em;
-            font-size: 2rem;
-            color: var(--gold);
-        }
-
-        .album-art::after {
-            content: "";
-            position: absolute;
-            inset: auto 22px 22px auto;
-            width: 110px;
-            height: 6px;
-            border-radius: 999px;
-            background: linear-gradient(90deg, transparent, rgba(229, 187, 86, 0.85), transparent);
-        }
-
-        .album-cover {
-            position: absolute;
-            left: 24px;
-            bottom: 24px;
-            width: min(54%, 220px);
-            aspect-ratio: 1 / 1;
-            border-radius: 20px;
+        .album-media {
+            position: relative;
+            border-radius: 22px;
             overflow: hidden;
-            border: 1px solid rgba(229, 187, 86, 0.4);
-            background:
-                radial-gradient(circle at 50% 28%, rgba(255, 255, 255, 0.25), transparent 18%),
-                linear-gradient(180deg, rgba(200, 31, 45, 0.88), rgba(18, 18, 18, 0.96));
+            border: 1px solid rgba(229, 187, 86, 0.32);
             box-shadow: 0 14px 36px rgba(0, 0, 0, 0.4);
-        }
-
-        .album-cover .silhouette {
-            position: absolute;
-            inset: 17% 20% 18% 20%;
-            border-radius: 18px;
-            background:
-                radial-gradient(circle at 50% 18%, #f5e2c4 0 8%, transparent 8.1%),
-                radial-gradient(circle at 43% 40%, #f5e2c4 0 8%, transparent 8.1%),
-                linear-gradient(180deg, transparent 0 26%, #f5e2c4 26% 32%, transparent 32% 38%, #f5e2c4 38% 44%, transparent 44% 52%, #f5e2c4 52% 60%, transparent 60% 100%);
-            clip-path: polygon(48% 0%, 62% 6%, 73% 20%, 74% 34%, 66% 46%, 67% 63%, 78% 84%, 78% 100%, 22% 100%, 22% 84%, 33% 63%, 33% 46%, 25% 34%, 26% 20%, 37% 6%);
-            transform: translateY(12px);
-            filter: drop-shadow(0 0 12px rgba(0, 0, 0, 0.5));
-        }
-
-        .disc {
-            position: absolute;
-            right: 28px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: min(54%, 230px);
+            background: #080808;
             aspect-ratio: 1 / 1;
-            border-radius: 50%;
-            background:
-                radial-gradient(circle at center, #1b1b1b 0 14%, #f2dfac 14% 17%, #171717 17% 24%, rgba(255, 255, 255, 0.08) 24% 25%, #0b0b0b 25% 100%),
-                conic-gradient(from 0deg, #b11f29, #f0c862, #b11f29, #8d1f26, #f0c862, #b11f29);
-            box-shadow: inset 0 0 0 16px rgba(255, 255, 255, 0.03), 0 18px 38px rgba(0, 0, 0, 0.42);
         }
 
-        .disc::before {
-            content: "";
-            position: absolute;
-            inset: 14px;
-            border-radius: 50%;
-            background: repeating-conic-gradient(from 0deg, rgba(255, 255, 255, 0.12) 0 8deg, transparent 8deg 16deg);
-            mask: radial-gradient(circle at center, transparent 0 52%, black 52% 100%);
-            opacity: 0.6;
+        .album-media--cover {
+            align-self: stretch;
         }
 
-        .disc::after {
-            content: "BILLIE JEAN";
-            position: absolute;
-            inset: 50% auto auto 50%;
-            transform: translate(-50%, -50%);
-            width: 80px;
-            height: 80px;
+        .album-media--disc {
             border-radius: 50%;
-            display: grid;
-            place-items: center;
-            text-align: center;
-            padding: 10px;
-            font-family: "Bebas Neue", sans-serif;
-            font-size: 1rem;
-            letter-spacing: 0.12em;
-            line-height: 1.1;
+        }
+
+        .album-media img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+        }
+
+        .album-media--disc img {
+            transform: scale(1.25);
+            object-position: center;
+        }
+
+        .album-caption {
+            position: absolute;
+            left: 14px;
+            right: 14px;
+            bottom: 14px;
+            padding: 8px 10px;
+            border-radius: 999px;
+            background: rgba(0, 0, 0, 0.58);
+            border: 1px solid rgba(255, 255, 255, 0.14);
             color: #f4dfb8;
-            background: radial-gradient(circle, #1d1d1d 0 47%, #f4dfb8 47% 49%, #151515 49% 100%);
-            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.08);
+            font-family: "Bebas Neue", sans-serif;
+            letter-spacing: 0.12em;
+            text-align: center;
         }
 
         .lyrics-card {
@@ -585,6 +541,87 @@
             color: #f0e3cd;
             line-height: 1.8;
             white-space: pre-line;
+        }
+
+        .lyrics-actions {
+            margin-top: 16px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .popup-overlay {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.72);
+            backdrop-filter: blur(8px);
+            z-index: 20;
+        }
+
+        .popup-overlay.is-open {
+            display: flex;
+        }
+
+        .popup-card {
+            width: min(100%, 560px);
+            max-height: min(80vh, 760px);
+            overflow-y: auto;
+            scrollbar-gutter: stable;
+            border-radius: 22px;
+            background: linear-gradient(180deg, rgba(18, 18, 20, 0.98), rgba(8, 8, 9, 0.98));
+            border: 1px solid rgba(229, 187, 86, 0.24);
+            box-shadow: var(--shadow);
+            padding: 22px;
+        }
+
+        .popup-card::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .popup-card::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 999px;
+        }
+
+        .popup-card::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(200, 31, 45, 0.85), rgba(229, 187, 86, 0.9));
+            border-radius: 999px;
+        }
+
+        .popup-card h3 {
+            font-family: "Bebas Neue", sans-serif;
+            font-size: 2rem;
+            letter-spacing: 0.08em;
+            color: var(--gold);
+            margin-bottom: 10px;
+        }
+
+        .popup-card p {
+            color: var(--muted);
+            line-height: 1.65;
+            margin-bottom: 14px;
+        }
+
+        .popup-quote {
+            margin: 16px 0 14px;
+            padding: 16px 18px;
+            border-radius: 16px;
+            border: 1px solid rgba(229, 187, 86, 0.18);
+            background: rgba(0, 0, 0, 0.32);
+            color: #f4dfb8;
+            line-height: 1.8;
+            white-space: pre-line;
+        }
+
+        .popup-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: flex-end;
         }
 
         .progress-summary {
@@ -815,51 +852,26 @@
 
         <section class="section-shell" aria-labelledby="media-showcase-title">
             <h2 class="section-title" id="media-showcase-title">Featured Videos</h2>
-            <p class="section-copy">
-                The banner footage is shown separately from the edited rotoscope cut. The second panel now plays the
-                local <strong>BJ.mp4</strong> file directly inside the page.
-            </p>
 
             <div class="media-grid">
                 <article class="media-card">
-                    <h3>Banner Video</h3>
-                    <p>Local source from media/videos/bannervideo.mp4 with basic playback controls.</p>
+                    <h3>Original Video</h3>
                     <figure class="video-shell">
-                        <video id="bannerVideo" autoplay muted loop playsinline preload="auto" aria-label="Banner video">
+                        <video id="bannerVideo" controls autoplay muted loop playsinline preload="auto" aria-label="Banner video">
                             <source src="../media/videos/bannervideo.mp4" type="video/mp4" />
                             Your browser cannot play this video format.
                         </video>
                     </figure>
-                    <div class="control-row">
-                        <button id="bannerMuteToggle" class="btn" type="button" aria-pressed="false">Mute Video</button>
-                        <span id="bannerStatus" class="status">Autoplay enabled, muted by default.</span>
-                    </div>
                 </article>
 
                 <article class="media-card">
                     <h3>Edited Rotoscope Video</h3>
-                    <p>
-                        This player uses the local edited file so it plays on the website itself without leaving the
-                        page.
-                    </p>
                     <figure class="video-shell">
-                        <video id="rotoscopeVideo" preload="metadata" playsinline aria-label="Edited rotoscope video">
+                        <video id="rotoscopeVideo" controls preload="metadata" playsinline aria-label="Edited rotoscope video">
                             <source src="../media/videos/BJ.mp4" type="video/mp4" />
                             Your browser cannot play this video format.
                         </video>
                     </figure>
-                    <div id="rotoscopeControlsWrap">
-                        <div class="custom-controls" id="rotoscopeControls" aria-label="Edited video controls">
-                            <button id="rotPlay" class="btn" type="button" aria-pressed="false">Play</button>
-                            <input id="rotProgress" type="range" min="0" max="0" value="0" aria-label="Seek" />
-                            <span id="rotTime" class="status">0:00 / 0:00</span>
-                            <input id="rotVolume" type="range" min="0" max="1" step="0.05" value="1" aria-label="Volume" style="width:110px;" />
-                            <button id="rotFS" class="btn" type="button" aria-label="Toggle fullscreen">⤢</button>
-                        </div>
-                        <div class="control-row">
-                            <span id="rotoscopeStatus" class="status">Local BJ.mp4 video loaded for inline playback.</span>
-                        </div>
-                    </div>
                 </article>
             </div>
         </section>
@@ -867,23 +879,23 @@
         <section class="section-shell" aria-labelledby="comparison-title">
             <h2 class="section-title" id="comparison-title">Comparison Slider</h2>
             <p class="section-copy">
-                Slide between the banner clip and the edited rotoscope view to compare the two treatments.
+                Slide between the banner clip and the edited rotoscope view to compare the two.
             </p>
 
             <div class="comparison-stage" id="comparisonStage">
-                <div class="comparison-label">Banner</div>
-                <div class="comparison-label right">Rotoscope</div>
+                <div class="comparison-label">Original Video</div>
+                <div class="comparison-label right">Rotoscoped</div>
 
                 <div class="comparison-layer comparison-layer--left">
-                    <video id="compareBannerVideo" controls autoplay muted loop playsinline preload="auto" aria-label="Comparison banner video">
-                        <source src="../media/videos/bannervideo.mp4" type="video/mp4" />
+                    <video id="compareBannerVideo" autoplay muted loop playsinline preload="auto" aria-label="Comparison banner video">
+                        <source src="../media/videos/og.mp4" type="video/mp4" />
                         Your browser cannot play this video format.
                     </video>
                 </div>
 
                 <div class="comparison-layer comparison-layer--right">
-                    <video id="compareRotoscopeVideo" controls autoplay muted loop playsinline preload="auto" aria-label="Comparison rotoscope video">
-                        <source src="../media/videos/BJ.mp4" type="video/mp4" />
+                    <video id="compareRotoscopeVideo" autoplay muted loop playsinline preload="auto" aria-label="Comparison rotoscope video">
+                        <source src="../media/videos/erot.mp4" type="video/mp4" />
                         Your browser cannot play this video format.
                     </video>
                 </div>
@@ -891,12 +903,12 @@
                 <div class="comparison-handle" aria-hidden="true"></div>
             </div>
 
-            <div class="slider-row">
+            <div class="slider-row" style="display: none;">
                 <input id="comparisonRange" type="range" min="0" max="100" value="50" aria-label="Comparison slider" />
                 <span id="comparisonReadout" class="slider-readout">50% / 50%</span>
             </div>
 
-            <div class="control-row" id="comparisonControls">
+            <div class="control-row" id="comparisonControls" style="display: none;">
                 <div style="display:flex;gap:8px;align-items:center;">
                     <button id="compPlay" class="btn" type="button">Play Both</button>
                     <button id="compPause" class="btn" type="button">Pause Both</button>
@@ -911,31 +923,31 @@
         </section>
 
         <section class="section-shell" aria-labelledby="album-title">
-            <h2 class="section-title" id="album-title">Thriller / Billie Jean</h2>
+            <h2 class="section-title" id="album-title">Thriller</h2>
             <p class="section-copy">
-                The album cover and disc are recreated in CSS so the page keeps the same concert-style direction without
-                relying on extra image files.
+               The sixth studio album by Michael Jackson, released on November 30, 1982. It is widely regarded as one of the greatest.
             </p>
 
             <div class="album-layout">
                 <div class="album-art" aria-label="Thriller inspired album art and disc">
-                    <div class="album-cover">
-                        <div class="silhouette"></div>
-                    </div>
-                    <div class="disc"></div>
+                    <figure class="album-media album-media--cover">
+                        <img src="../media/mscs/thriller.jpg" alt="Thriller album cover" />
+                    </figure>
+                    <figure class="album-media album-media--disc">
+                        <img src="../media/mscs/thrillerdsc.jpg" alt="Thriller disc artwork" />
+                    </figure>
                 </div>
 
                 <div class="lyrics-card">
                     <div class="lyrics-panel">
-                        <h3>Billie Jean Lyrics</h3>
-                        <p class="lyrics-note">
-                            I can’t reproduce the full lyrics here, but I can show a short excerpt and keep the rest as
-                            an on-page note.
-                        </p>
+                        <h3>Billie Jean</h3>
                         <div class="lyrics-box">
-                            Billie Jean is not my lover.
+The song was inspired by several experiences rather than one specific person. Michael Jackson said that "Billie Jean" represented the groupies who followed him and his brothers during their time with The Jackson 5. Some women falsely claimed that members of the group had fathered their children, creating emotional and legal concerns.
 
-                            The full song text is omitted here due to copyright.
+Michael also revealed that he received disturbing letters from a woman who insisted he was the father of her twins. The harassment became so intense that she even sent him a gun and urged him to take his own life after she and her child did. While this incident influenced his perspective, Michael maintained that the character "Billie Jean" was fictional, created as a symbol of obsessive fans and false accusations rather than based on a single individual.
+                            <div class="lyrics-actions">
+                                <button id="openLyricsPopup" class="btn" type="button">Show full Lyrics</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -960,7 +972,76 @@
             <div id="weeksGrid" class="weeks-grid"></div>
         </section>
 
-        <footer class="footer">EDUCATIONAL PURPOSES ONLY</footer>
+        <footer class="footer">© 2026 Solar System Project — Created by Lance Grant E. Haboc</footer>
+    </div>
+
+    <div class="popup-overlay" id="lyricsPopup" role="dialog" aria-modal="true" aria-labelledby="lyricsPopupTitle" aria-hidden="true">
+        <div class="popup-card">
+            <h3 id="lyricsPopupTitle">Lyrics</h3>
+            <div class="popup-quote">She was more like a beauty queen from a movie scene
+I said, "Don't mind, but what do you mean, I am the one
+Who will dance on the floor in the round?"
+She said I am the one
+Who will dance on the floor in the round
+She told me her name was Billie Jean as she caused a scene
+Then every head turned with eyes that dreamed of bein' the one
+Who will dance on the floor in the round
+People always told me, "Be careful of what you do
+Don't go around breakin' young girls' hearts" (hee-hee)
+And mother always told me, "Be careful of who you love
+And be careful of what you do (oh-oh)
+'Cause the lie becomes the truth" (oh-oh), hey-ey
+Billie Jean is not my lover
+She's just a girl who claims that I am the one (oh, baby)
+But the kid is not my son (hoo)
+She says I am the one (oh, baby)
+But the kid is not my son (hee-hee-hee, no-no, hee-hee-hee, hoo)
+For forty days and for forty nights, law was on her side
+But who can stand when she's in demand? Her schemes and plans
+'Cause we danced on the floor in the round (hee)
+So take my strong advice
+Just remember to always think twice
+(Do think twice) do think twice (ah-hoo)
+She told my baby we'd danced 'til three, then she looked at me
+Then showed a photo of a baby cryin', his eyes were like mine (oh, no)
+Go and dance on the floor in the round, baby (ooh, hee-hee-hee)
+People always told me, "Be careful of what you do
+And don't go around breakin' young girls' hearts" (don't break no hearts, hee-hee)
+But she came and stood right by me
+Just the smell of sweet perfume
+This happened much too soon
+She called me to her room, hey-ey
+Billie Jean is not my lover (hoo)
+She's just a girl who claims that I am the one
+But the kid is not my son
+No-no-no, no-no, no-no-no (hoo)
+Billie Jean is not my lover
+She's just a girl who claims that I am the one (oh, baby)
+But the kid is not my son (no, no)
+She says I am the one (oh, baby)
+But the kid is not my son (no, hee-hee-ho, hee-hee-hee)
+Hee, hoo
+She says I am the one
+But the kid is not my son (no-no-no, hoo, oh)
+Billie Jean is not my lover
+She's just a girl who claims that I am the one (you know what you did to me, baby)
+But the kid is not my son
+No-no-no (no-no-no, ah), no-no-no-no (no-no-no)
+She says I am the one (no)
+But the kid is not my son (no-no-no-no)
+She says I am the one (you know what you did)
+She says he is my son (breakin' my heart, babe)
+She says I am the one
+Billie Jean is not my lover
+Billie Jean is not my lover
+Billie Jean is not my lover
+Billie Jean is not my lover (don't call me Billie Jean, hoo)
+Billie Jean is not my lover
+Billie Jean is not- (hee)</div>
+            <div class="popup-links">
+                <button id="closeLyricsPopup" class="btn" type="button">Close</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -975,12 +1056,32 @@
         const weeksGrid = document.getElementById("weeksGrid");
         const overallProgressBar = document.getElementById("overallProgressBar");
         const overallProgressText = document.getElementById("overallProgressText");
+        const lyricsPopup = document.getElementById("lyricsPopup");
+        const openLyricsPopup = document.getElementById("openLyricsPopup");
+        const closeLyricsPopup = document.getElementById("closeLyricsPopup");
 
-        if (rotoscopeStatus) {
-            rotoscopeStatus.textContent = rotoscopeVideo
-                ? "Local BJ.mp4 video loaded for inline playback."
-                : "Edited video player could not be initialized.";
-        }
+        const showLyricsPopup = () => {
+            if (!lyricsPopup) return;
+            lyricsPopup.classList.add("is-open");
+            lyricsPopup.setAttribute("aria-hidden", "false");
+        };
+
+        const hideLyricsPopup = () => {
+            if (!lyricsPopup) return;
+            lyricsPopup.classList.remove("is-open");
+            lyricsPopup.setAttribute("aria-hidden", "true");
+        };
+
+        openLyricsPopup && openLyricsPopup.addEventListener("click", showLyricsPopup);
+        closeLyricsPopup && closeLyricsPopup.addEventListener("click", hideLyricsPopup);
+
+        lyricsPopup && lyricsPopup.addEventListener("click", (event) => {
+            if (event.target === lyricsPopup) hideLyricsPopup();
+        });
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") hideLyricsPopup();
+        });
 
         if (bannerVideo) {
             bannerVideo.muted = true;
@@ -1004,19 +1105,52 @@
         comparisonRange.addEventListener("input", comparisonSync);
         comparisonSync();
 
+        // Make the comparison stage draggable
+        let isDraggingComparison = false;
+
+        const updateComparisonFromMouse = (e) => {
+            if (!isDraggingComparison) return;
+
+            const rect = comparisonStage.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+
+            comparisonRange.value = percentage;
+            comparisonSync();
+        };
+
+        comparisonStage.addEventListener("mousedown", () => {
+            isDraggingComparison = true;
+        });
+
+        document.addEventListener("mousemove", updateComparisonFromMouse);
+
+        document.addEventListener("mouseup", () => {
+            isDraggingComparison = false;
+        });
+
+        comparisonStage.addEventListener("click", (e) => {
+            const rect = comparisonStage.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+
+            comparisonRange.value = percentage;
+            comparisonSync();
+        });
+
         const weekData = [
             { week: 1, percent: 8, phase: "Reference capture", note: "Recorded and selected stable footage, then tested framing for the rotoscope setup.", video: "../media/videos/ProgressRoto/WEEK1.mp4" },
-            { week: 2, percent: 14, phase: "Frame planning", note: "Set the frame target and organized the source sequence for tracing." },
+            { week: 2, percent: 14, phase: "Frame planning", note: "Set the frame target and organized the source sequence for tracing.", video: "../media/videos/ProgressRoto/WEEK2.mp4" },
             { week: 3, percent: 22, phase: "Initial tracing", note: "Began line work and checked motion continuity between frames.", video: "../media/videos/ProgressRoto/WEEK3.mp4" },
-            { week: 4, percent: 30, phase: "Layer cleanup", note: "Refined the traced structure and tightened the compositing layout." },
+            { week: 4, percent: 30, phase: "Layer cleanup", note: "Refined the traced structure and tightened the compositing layout.", video: "../media/videos/ProgressRoto/WEEK4.mp4" },
             { week: 5, percent: 38, phase: "Styling pass", note: "Pushed the visual style and refined the export-ready sequences.", video: "../media/videos/ProgressRoto/WEEK5.mp4" },
-            { week: 6, percent: 47, phase: "Color testing", note: "Tested contrast, color balance, and timing adjustments." },
-            { week: 7, percent: 56, phase: "Motion polish", note: "Checked pose transitions and cleaned rough frame edges." },
-            { week: 8, percent: 65, phase: "Composite build", note: "Rebuilt the sequence with improved visual separation and pacing." },
-            { week: 9, percent: 74, phase: "Detail pass", note: "Added final line refinements and controlled highlights." },
-            { week: 10, percent: 83, phase: "Visual tuning", note: "Adjusted rhythm, balance, and finishing details." },
-            { week: 11, percent: 91, phase: "Final review", note: "Reviewed the full cut and fixed the last inconsistencies." },
-            { week: 12, percent: 100, phase: "Final export", note: "Rendered the final sequence and prepared the presentation." }
+            { week: 6, percent: 47, phase: "Color testing", note: "Tested contrast, color balance, and timing adjustments.", video: "../media/videos/ProgressRoto/WEEK6.mp4" },
+            { week: 7, percent: 56, phase: "Motion polish", note: "Checked pose transitions and cleaned rough frame edges.", video: "../media/videos/ProgressRoto/WEEK7.mp4" },
+            { week: 8, percent: 65, phase: "Composite build", note: "Rebuilt the sequence with improved visual separation and pacing.", video: "../media/videos/ProgressRoto/WEEK8.mp4" },
+            { week: 9, percent: 74, phase: "Detail pass", note: "Added final line refinements and controlled highlights.", video: "../media/videos/ProgressRoto/WEEK9.mp4" },
+            { week: 10, percent: 83, phase: "Visual tuning", note: "Adjusted rhythm, balance, and finishing details.", video: "../media/videos/ProgressRoto/WEEK10.mp4" },
+            { week: 11, percent: 91, phase: "Final review", note: "Reviewed the full cut and fixed the last inconsistencies. Added Epilepsy Warning and Purpose.", video: "../media/videos/ProgressRoto/WEEK11.mp4" },
+            { week: 12, percent: 100, phase: "Final export", note: "Rendered the final sequence and prepared the presentation.", video: "../media/videos/ProgressRoto/WEEK12.mp4" },
         ];
 
         const renderWeekCard = (entry) => {
@@ -1055,66 +1189,10 @@
         }
 
         if (overallProgressBar && overallProgressText) {
-            const averageProgress = Math.round(
-                weekData.reduce((total, entry) => total + entry.percent, 0) / weekData.length
-            );
-            overallProgressBar.style.width = `${averageProgress}%`;
-            overallProgressText.textContent = `Overall progress: ${averageProgress}%`;
-        }
-
-        // --- Custom controls for the Edited Rotoscope Video ---
-        const rotPlayBtn = document.getElementById("rotPlay");
-        const rotProgress = document.getElementById("rotProgress");
-        const rotTime = document.getElementById("rotTime");
-        const rotVolume = document.getElementById("rotVolume");
-        const rotFS = document.getElementById("rotFS");
-
-        const formatTime = (s) => {
-            if (!isFinite(s) || s <= 0) return "0:00";
-            const m = Math.floor(s / 60);
-            const sec = Math.floor(s % 60).toString().padStart(2, "0");
-            return `${m}:${sec}`;
-        };
-
-        if (rotoscopeVideo) {
-            rotoscopeVideo.removeAttribute("controls");
-
-            rotoscopeVideo.addEventListener("loadedmetadata", () => {
-                rotProgress.max = Math.floor(rotoscopeVideo.duration) || 0;
-                rotProgress.value = 0;
-                rotTime.textContent = `0:00 / ${formatTime(rotoscopeVideo.duration)}`;
-            });
-
-            rotoscopeVideo.addEventListener("timeupdate", () => {
-                rotProgress.value = Math.floor(rotoscopeVideo.currentTime);
-                rotTime.textContent = `${formatTime(rotoscopeVideo.currentTime)} / ${formatTime(rotoscopeVideo.duration)}`;
-                if (rotoscopeVideo.paused) rotPlayBtn.textContent = "Play";
-                else rotPlayBtn.textContent = "Pause";
-            });
-
-            rotPlayBtn.addEventListener("click", () => {
-                if (rotoscopeVideo.paused) {
-                    rotoscopeVideo.play();
-                    rotPlayBtn.textContent = "Pause";
-                } else {
-                    rotoscopeVideo.pause();
-                    rotPlayBtn.textContent = "Play";
-                }
-            });
-
-            rotProgress.addEventListener("input", () => {
-                rotoscopeVideo.currentTime = Number(rotProgress.value);
-            });
-
-            rotVolume.addEventListener("input", () => {
-                rotoscopeVideo.volume = Number(rotVolume.value);
-            });
-
-            rotFS.addEventListener("click", () => {
-                const el = rotoscopeVideo.closest(".video-shell") || rotoscopeVideo;
-                if (document.fullscreenElement) document.exitFullscreen();
-                else if (el.requestFullscreen) el.requestFullscreen();
-            });
+            // Force overall progress to 100% for the production timeline
+            const averageProgress = 100;
+            overallProgressBar.style.width = `100%`;
+            overallProgressText.textContent = `Overall progress: 100%`;
         }
 
         // Ensure comparison videos show native controls but keep them in sync when user wants to play both

@@ -203,6 +203,15 @@
                 linear-gradient(180deg, rgba(17, 28, 50, 0.95), rgba(6, 11, 20, 0.95));
         }
 
+        .placeholder-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            min-height: 320px;
+            background: #08111f;
+        }
+
         .placeholder-frame video,
         .placeholder-frame img,
         .placeholder-frame iframe {
@@ -236,6 +245,24 @@
             max-width: 32ch;
             line-height: 1.5;
             margin: 0 auto;
+        }
+
+        .placeholder-controls {
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .placeholder-actions {
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+            flex-wrap: wrap;
         }
 
         .section-shell {
@@ -356,15 +383,29 @@
         }
 
         .planet-display.mercury-mode,
+        .planet-display.mars-mode,
+        .planet-display.jupiter-mode,
+        .planet-display.saturn-mode,
+        .planet-display.uranus-mode,
+        .planet-display.neptune-mode,
+        .planet-display.pluto-mode,
         .planet-display.sun-mode,
-        .planet-display.venus-mode {
+        .planet-display.venus-mode,
+        .planet-display.earth-mode {
             align-items: stretch;
             padding: 18px;
         }
 
         .planet-display.mercury-mode .planet-overlay,
+        .planet-display.mars-mode .planet-overlay,
+        .planet-display.jupiter-mode .planet-overlay,
+        .planet-display.saturn-mode .planet-overlay,
+        .planet-display.uranus-mode .planet-overlay,
+        .planet-display.neptune-mode .planet-overlay,
+        .planet-display.pluto-mode .planet-overlay,
         .planet-display.sun-mode .planet-overlay,
-        .planet-display.venus-mode .planet-overlay {
+        .planet-display.venus-mode .planet-overlay,
+        .planet-display.earth-mode .planet-overlay {
             height: 100%;
             align-self: stretch;
             justify-content: flex-start;
@@ -374,25 +415,53 @@
         }
 
         .planet-display.mercury-mode .planet-video,
+        .planet-display.mars-mode .planet-video,
+        .planet-display.jupiter-mode .planet-video,
+        .planet-display.saturn-mode .planet-video,
+        .planet-display.uranus-mode .planet-video,
+        .planet-display.neptune-mode .planet-video,
+        .planet-display.pluto-mode .planet-video,
         .planet-display.sun-mode .planet-video,
-        .planet-display.venus-mode .planet-video {
+        .planet-display.venus-mode .planet-video,
+        .planet-display.earth-mode .planet-video {
             box-shadow: none;
             filter: none;
         }
 
         .planet-display.mercury-mode .planet-name,
+        .planet-display.mars-mode .planet-name,
+        .planet-display.jupiter-mode .planet-name,
+        .planet-display.saturn-mode .planet-name,
+        .planet-display.uranus-mode .planet-name,
+        .planet-display.neptune-mode .planet-name,
+        .planet-display.pluto-mode .planet-name,
         .planet-display.mercury-mode .planet-copy,
+        .planet-display.mars-mode .planet-copy,
+        .planet-display.jupiter-mode .planet-copy,
+        .planet-display.saturn-mode .planet-copy,
+        .planet-display.uranus-mode .planet-copy,
+        .planet-display.neptune-mode .planet-copy,
+        .planet-display.pluto-mode .planet-copy,
         .planet-display.sun-mode .planet-name,
         .planet-display.sun-mode .planet-copy,
         .planet-display.venus-mode .planet-name,
-        .planet-display.venus-mode .planet-copy {
+        .planet-display.venus-mode .planet-copy,
+        .planet-display.earth-mode .planet-name,
+        .planet-display.earth-mode .planet-copy {
             position: relative;
             z-index: 1;
         }
 
         .planet-display.mercury-mode .planet-name,
+        .planet-display.mars-mode .planet-name,
+        .planet-display.jupiter-mode .planet-name,
+        .planet-display.saturn-mode .planet-name,
+        .planet-display.uranus-mode .planet-name,
+        .planet-display.neptune-mode .planet-name,
+        .planet-display.pluto-mode .planet-name,
         .planet-display.sun-mode .planet-name,
-        .planet-display.venus-mode .planet-name {
+        .planet-display.venus-mode .planet-name,
+        .planet-display.earth-mode .planet-name {
             margin: 0;
             position: absolute;
             top: 0;
@@ -402,20 +471,41 @@
         }
 
         .planet-display.mercury-mode .planet-copy,
+        .planet-display.mars-mode .planet-copy,
+        .planet-display.jupiter-mode .planet-copy,
+        .planet-display.saturn-mode .planet-copy,
+        .planet-display.uranus-mode .planet-copy,
+        .planet-display.neptune-mode .planet-copy,
+        .planet-display.pluto-mode .planet-copy,
         .planet-display.sun-mode .planet-copy,
-        .planet-display.venus-mode .planet-copy {
+        .planet-display.venus-mode .planet-copy,
+        .planet-display.earth-mode .planet-copy {
             display: none;
         }
 
         .planet-display.mercury-mode .viewfinder-meta,
+        .planet-display.mars-mode .viewfinder-meta,
+        .planet-display.jupiter-mode .viewfinder-meta,
+        .planet-display.saturn-mode .viewfinder-meta,
+        .planet-display.uranus-mode .viewfinder-meta,
+        .planet-display.neptune-mode .viewfinder-meta,
+        .planet-display.pluto-mode .viewfinder-meta,
         .planet-display.sun-mode .viewfinder-meta,
-        .planet-display.venus-mode .viewfinder-meta {
+        .planet-display.venus-mode .viewfinder-meta,
+        .planet-display.earth-mode .viewfinder-meta {
             display: none;
         }
 
         .planet-display.mercury-mode .mode-pill,
+        .planet-display.mars-mode .mode-pill,
+        .planet-display.jupiter-mode .mode-pill,
+        .planet-display.saturn-mode .mode-pill,
+        .planet-display.uranus-mode .mode-pill,
+        .planet-display.neptune-mode .mode-pill,
+        .planet-display.pluto-mode .mode-pill,
         .planet-display.sun-mode .mode-pill,
-        .planet-display.venus-mode .mode-pill {
+        .planet-display.venus-mode .mode-pill,
+        .planet-display.earth-mode .mode-pill {
             color: #f6fbff;
             background: rgba(3, 7, 14, 0.46);
             border-color: rgba(255, 255, 255, 0.12);
@@ -423,8 +513,15 @@
         }
 
         .planet-display.mercury-mode .planet-overlay::before,
+        .planet-display.mars-mode .planet-overlay::before,
+        .planet-display.jupiter-mode .planet-overlay::before,
+        .planet-display.saturn-mode .planet-overlay::before,
+        .planet-display.uranus-mode .planet-overlay::before,
+        .planet-display.neptune-mode .planet-overlay::before,
+        .planet-display.pluto-mode .planet-overlay::before,
         .planet-display.sun-mode .planet-overlay::before,
-        .planet-display.venus-mode .planet-overlay::before {
+        .planet-display.venus-mode .planet-overlay::before,
+        .planet-display.earth-mode .planet-overlay::before {
             display: none;
         }
 
@@ -674,6 +771,48 @@
             color: var(--muted);
         }
 
+        .program-logos {
+            display: grid;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .program-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .program-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px;
+            height: 56px;
+            padding: 8px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            flex-shrink: 0;
+        }
+
+        .program-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .program-name {
+            color: var(--ink);
+            font-weight: 700;
+        }
+
         .orbit-steps {
             margin-top: 10px;
             padding-left: 20px;
@@ -913,6 +1052,116 @@
         @media (max-width: 620px) {
             .site-footer { flex-direction: column; align-items: flex-start; gap: 8px; }
         }
+
+        /* Script Modal Styles */
+        .script-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .script-modal[hidden] {
+            display: none;
+        }
+
+        .script-modal-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+        }
+
+        .script-modal-content {
+            position: relative;
+            z-index: 1001;
+            background: var(--card);
+            border: 2px solid var(--border);
+            border-radius: 20px 8px 16px 12px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow: hidden;
+        }
+
+        .script-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .script-modal-header h2 {
+            margin: 0;
+            font-size: 1.6rem;
+            font-family: "Gloria Hallelujah", cursive;
+            color: var(--sun);
+        }
+
+        .script-modal-close {
+            background: none;
+            border: none;
+            color: var(--ink);
+            font-size: 1.8rem;
+            cursor: pointer;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: background 180ms ease, color 180ms ease;
+        }
+
+        .script-modal-close:hover {
+            background: rgba(124, 212, 255, 0.1);
+            color: var(--accent);
+        }
+
+        .script-modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 24px;
+        }
+
+        .script-viewer {
+            width: 100%;
+            min-height: 60vh;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: #07111d;
+            color: var(--ink);
+        }
+
+        .script-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 20px 24px;
+            border-top: 1px solid var(--border);
+        }
+
+        @media (max-width: 768px) {
+            .script-modal-content {
+                max-height: 80vh;
+            }
+
+            .script-modal-header h2 {
+                font-size: 1.3rem;
+            }
+
+            .script-viewer {
+                min-height: 50vh;
+            }
+        }
     </style>
 </head>
 <body>
@@ -941,18 +1190,22 @@
             <aside class="status-card" aria-label="Solar system media placeholder">
                 <div class="status-label">Main View</div>
                 <div class="placeholder-frame">
+                    <video class="placeholder-video" id="solarSystemVideo" autoplay loop muted playsinline preload="auto" aria-label="Solar system intro video">
+                        <source src="../media/videos/SolarSystem/og.mp4" type="video/mp4" />
+                    </video>
                     <div class="placeholder-overlay">
-                        <div>
-                            <strong>3D Solar System Video Placeholder</strong>
-                            <p>Drop in your video or embed here. Until then, this panel shows where the main cinematic intro will sit.</p>
-                        </div>
                     </div>
+                </div>
+                <div class="placeholder-actions">
+                    <button class="ghost-button" id="mainViewScriptBtn" type="button">View Main Script</button>
+                    <button class="ghost-button" id="solarSystemToggle" type="button">Switch to Realistic Solar System</button>
+                    <button class="ghost-button" id="solarSystemFullscreen" type="button">Open Fullscreen</button>
                 </div>
             </aside>
         </section>
 
         <section class="section-shell" id="cockpit">
-            <h2 class="section-title">Cockpit View</h2>
+            <h2 class="section-title">Planet View</h2>
             <p class="section-note">
                 The cockpit is designed like a command deck. The viewfinder keeps the selected planet in the center, and the planet controls below trigger a hyperspace jump plus the matching mission description.
             </p>
@@ -983,7 +1236,10 @@
 
                 <aside class="controls">
                     <div class="description-panel">
-                        <h3>Description</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h3 style="margin: 0;">Description</h3>
+                            <button class="ghost-button" id="viewScriptBtn" type="button" style="font-size: 0.85rem; padding: 6px 10px; min-height: auto;">View Script</button>
+                        </div>
                         <p id="planetDescription">
                             Earth is currently centered in the viewfinder. Choose another planet to trigger the hyperspace effect and update this cockpit briefing.
                         </p>
@@ -1007,7 +1263,7 @@
                             <button class="planet-button" type="button" data-planet="Saturn" data-copy="Known for its rings and wide silhouette, ideal for a dramatic approach sequence.">Saturn<small>Ring system</small></button>
                             <button class="planet-button" type="button" data-planet="Uranus" data-copy="An ice giant with a pale cyan tone, useful for a colder outer-system transition.">Uranus<small>Ice giant</small></button>
                             <button class="planet-button" type="button" data-planet="Neptune" data-copy="A deep blue outer-world that closes the tour with a farthest-route jump.">Neptune<small>Outer edge</small></button>
-                            <button class="planet-button" type="button" data-planet="Pluto" data-copy="Pluto is a distant dwarf world at the edge of the system, giving the cockpit a final far-out destination.">Pluto<small>Dwarf planet</small></button>
+                            <button class="planet-button" type="button" data-planet="Pluto" data-copy="Pluto is a distant dwarf world at the edge of the system, giving the cockpit a final far-out destination.">Pluto<small>Outer edge</small></button>
                         </div>
                     </div>
                 </aside>
@@ -1018,7 +1274,6 @@
             <h2 class="section-title">Planet Age Calculator</h2>
             <p class="section-note">
                 Enter your age in Earth years and see what that same lifespan looks like on each planet.
-                Smaller orbits make you older faster, while farther planets stretch your age out more slowly.
             </p>
 
             <div class="age-panel">
@@ -1027,7 +1282,7 @@
                     <div class="age-field">
                         <label for="earthAge">Age on Earth</label>
                         <input id="earthAge" type="number" min="0" max="1200" step="0.1" value="18" />
-                        <p class="age-hint">Use decimal ages if you want a more exact result. Example: 18.5 years.</p>
+                        <p class="age-hint"><i>Use decimal ages if you want a more exact result. Example: 18.5 years.</i></p>
                     </div>
 
                     <div class="age-actions">
@@ -1059,24 +1314,54 @@
                 </article>
                 <article class="orbit-card">
                     <h2>Programs used:</h2>
-                    <p>Blender 5.1.1, Python 3.8, and Javascript</p>
+                    <div class="program-logos" aria-label="Program logos">
+                        <div class="program-item">
+                            <div class="program-logo" title="Blender">
+                                <img src="../media/mscs/progsused_solarsystem/blenderlogo.svg" alt="Blender logo" />
+                            </div>
+                            <span class="program-name">Blender 5.1.2</span>
+                        </div>
+                        <div class="program-item">
+                            <div class="program-logo" title="Python">
+                                <img src="../media/mscs/progsused_solarsystem/pythonlogo.svg" alt="Python logo" />
+                            </div>
+                            <span class="program-name">Python 3.8</span>
+                        </div>
+                        <div class="program-item">
+                            <div class="program-logo" title="JavaScript">
+                                <img src="../media/mscs/progsused_solarsystem/javascriptlogo.png" alt="JavaScript logo" />
+                            </div>
+                            <span class="program-name">JavaScript</span>
+                        </div>
+                    </div>
                 </article>
                 <article class="orbit-card">
                     <h2>Future Media Ready</h2>
                     <p>The layout is prepared for images, videos, or interactive planet assets without changing the page structure.</p>
                 </article>
             </div>
-
-            <ul class="quick-list">
-                <li>Responsive intro-and-cockpit flow for desktop and mobile visitors.</li>
-                <li>Placeholder panels for missing video or image embeds.</li>
-                <li>JavaScript-powered planet switching with a starship-style hyperspace transition.</li>
-            </ul>
         </section>
             <footer class="site-footer" aria-label="Page footer">
                 <div class="credits">© 2026 Solar System Project — Created by Lancelot</div>
                 <div class="links"><a href="../index.html#projects">Back to Portfolio</a> · <a href="mailto:contact@example.com">Contact</a></div>
             </footer>
+    </div>
+
+    <!-- Script Viewer Modal -->
+    <div id="scriptModal" class="script-modal" aria-modal="true" role="dialog" hidden>
+        <div class="script-modal-overlay"></div>
+        <div class="script-modal-content">
+            <div class="script-modal-header">OG
+                <h2 id="scriptModalTitle">View Script</h2>
+                <button id="closeScriptModal" class="script-modal-close" type="button" aria-label="Close modal">✕</button>
+            </div>
+            <div class="script-modal-body">
+                <iframe id="scriptContent" class="script-viewer" title="Script preview"></iframe>
+            </div>
+            <div class="script-modal-footer">
+                <button id="closeScriptModalBtn" class="cta-button" type="button">Close</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -1093,10 +1378,27 @@
         const fuelLabel = document.getElementById("fuelLabel");
         const flightMode = document.getElementById("flightMode");
         const hyperspaceVideo = document.getElementById("hyperspaceVideo");
+        const solarSystemVideo = document.getElementById("solarSystemVideo");
+        const solarSystemToggle = document.getElementById("solarSystemToggle");
+        const solarSystemFullscreen = document.getElementById("solarSystemFullscreen");
+        const mainViewScriptBtn = document.getElementById("mainViewScriptBtn");
+        const viewScriptBtn = document.getElementById("viewScriptBtn");
+        const scriptModal = document.getElementById("scriptModal");
+        const scriptModalTitle = document.getElementById("scriptModalTitle");
+        const scriptContent = document.getElementById("scriptContent");
+        const closeScriptModal = document.getElementById("closeScriptModal");
+        const closeScriptModalBtn = document.getElementById("closeScriptModalBtn");
         const planetVideoSources = {
             Sun: "../media/videos/Planets/sun.mp4",
             Mercury: "../media/videos/Planets/mercury.mp4",
-            Venus: "../media/videos/Planets/venus.mp4"
+            Venus: "../media/videos/Planets/venus.mp4",
+            Earth: "../media/videos/Planets/earth.mp4",
+            Mars: "../media/videos/Planets/mars.mp4",
+            Jupiter: "../media/videos/Planets/jupiter.mp4"
+            ,Saturn: "../media/videos/Planets/saturn.mp4"
+            ,Uranus: "../media/videos/Planets/uranus.mp4",
+            Neptune: "../media/videos/Planets/neptune.mp4",
+            Pluto: "../media/videos/Planets/pluto.mp4"
         };
         const maxDistanceAu = 39.5;
         const earthAgeInput = document.getElementById("earthAge");
@@ -1104,65 +1406,146 @@
         const resetAgeBtn = document.getElementById("resetAgeBtn");
         const ageGrid = document.getElementById("ageGrid");
         const ageNote = document.getElementById("ageNote");
+        const solarSystemVariants = {
+            og: {
+                source: "../media/videos/SolarSystem/og.mp4",
+                buttonText: "Switch to Realistic Solar System"
+            },
+            real: {
+                source: "../media/videos/SolarSystem/real.mp4",
+                buttonText: "Switch to Main Solar System"
+            }
+        };
+        let activeSolarSystemVariant = "og";
+        let activePlanetSelection = "Earth";
+        let selectedVoice = null;
+
+        const initializeRoboticVoice = () => {
+            if (!window.speechSynthesis) {
+                return;
+            }
+
+            const voices = window.speechSynthesis.getVoices();
+            selectedVoice = voices.find((voice) => /en/i.test(voice.lang) && /male|robot|google/i.test(voice.name))
+                || voices.find((voice) => /en/i.test(voice.lang))
+                || voices[0]
+                || null;
+        };
+
+        if (window.speechSynthesis) {
+            initializeRoboticVoice();
+            window.speechSynthesis.onvoiceschanged = initializeRoboticVoice;
+        }
+
+        const speakPlanetDescription = (planetNameValue, description) => {
+            if (!window.speechSynthesis || !description) {
+                return;
+            }
+
+            window.speechSynthesis.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(description);
+            utterance.lang = "en-US";
+            utterance.rate = 0.9;
+            utterance.pitch = 0.55;
+            utterance.volume = 1;
+            utterance.voice = selectedVoice;
+
+            if (/sun|jupiter|saturn/i.test(planetNameValue)) {
+                utterance.rate = 0.82;
+            }
+
+            window.speechSynthesis.speak(utterance);
+        };
+
+        const updateSolarSystemIntro = (variantName) => {
+            const variant = solarSystemVariants[variantName] || solarSystemVariants.og;
+
+            activeSolarSystemVariant = variantName in solarSystemVariants ? variantName : "og";
+            if (solarSystemVideo) {
+                const sourceElement = solarSystemVideo.querySelector("source");
+                if (sourceElement && sourceElement.getAttribute("src") !== variant.source) {
+                    sourceElement.setAttribute("src", variant.source);
+                    solarSystemVideo.load();
+                }
+                solarSystemVideo.play().catch(() => {
+                    // Decorative intro video; ignore playback failures.
+                });
+            }
+
+            if (solarSystemToggle) {
+                solarSystemToggle.textContent = variant.buttonText;
+            }
+        };
+
+        const updateFullscreenButton = () => {
+            if (!solarSystemFullscreen) {
+                return;
+            }
+
+            solarSystemFullscreen.textContent = document.fullscreenElement === solarSystemVideo?.parentElement
+                ? "Exit Fullscreen"
+                : "Open Fullscreen";
+        };
 
         const planetData = {
             Sun: {
                 tagline: "Central star locked.",
-                description: "The Sun is the bright core of the solar system and works as the cockpit's main anchor point.",
+                description: "The Sun is the bright star at the center of the solar system, made mostly of hydrogen and helium.",
                 facts: ["Temperature: about 5,500°C at the surface", "Diameter: about 1.39 million km", "Role: contains more than 99% of the solar system's mass"],
                 distanceAu: 0
             },
             Mercury: {
                 tagline: "Closest orbit lock engaged.",
-                description: "Mercury is a fast, cratered world that gives the cockpit a tight inner-system jump and a quick hyperspace exit.",
+                description: "Mercury is a small, cratered world and the closest planet to the Sun.",
                 facts: ["Surface temperature: about 430°C in daylight and -180°C at night", "Moons: 0", "Year length: 88 Earth days"],
                 distanceAu: 0.39
             },
             Venus: {
                 tagline: "Atmospheric target acquired.",
-                description: "Venus fills the cockpit with a bright, cloud-heavy route and a high-contrast destination readout.",
+                description: "Venus is a rocky planet covered by thick clouds and a dense, toxic atmosphere.",
                 facts: ["Surface temperature: about 465°C", "Atmosphere: thick carbon dioxide with sulfuric acid clouds", "Day length: longer than its year"],
                 distanceAu: 0.72
             },
             Earth: {
                 tagline: "Homeworld selected.",
-                description: "Earth stays centered as the default lock, giving the cockpit a familiar blue destination and a stable starting point.",
+                description: "Earth is the third planet from the Sun and the only known world with liquid water and life.",
                 facts: ["Surface temperature: roughly -89°C to 58°C", "Moons: 1", "Water: about 71% of the surface is covered by oceans"],
                 distanceAu: 1
             },
             Mars: {
                 tagline: "Red frontier engaged.",
-                description: "Mars is ideal for a dramatic hyperspace jump, with a dusty red surface and a strong exploration vibe.",
+                description: "Mars is a cold, dusty red planet known for its dry deserts, volcanoes, and deep canyons.",
                 facts: ["Surface temperature: about -63°C on average", "Moons: 2", "Atmosphere: very thin and mostly carbon dioxide"],
                 distanceAu: 1.52
             },
             Jupiter: {
                 tagline: "Gas giant route plotted.",
-                description: "Jupiter expands the cockpit telemetry with massive scale, storm bands, and a high-energy flyby feel.",
+                description: "Jupiter is the largest planet in the solar system, famous for its storms and colorful cloud bands.",
                 facts: ["Cloud-top temperature: about -145°C", "Moons: 95+", "Feature: the Great Red Spot is a giant storm"],
                 distanceAu: 5.2
             },
             Saturn: {
                 tagline: "Ring system aligned.",
-                description: "Saturn brings a wide-ring silhouette into the viewfinder for a cinematic command-deck arrival.",
+                description: "Saturn is a gas giant best known for its bright rings made mostly of ice and rock.",
                 facts: ["Cloud-top temperature: about -178°C", "Moons: 145+", "Feature: its rings are made mostly of ice and rock"],
                 distanceAu: 9.58
             },
             Uranus: {
                 tagline: "Outer ice giant targeted.",
-                description: "Uranus shifts the cockpit tone cooler and farther out, suggesting the edge of the system.",
+                description: "Uranus is an ice giant with a pale blue color and a tilted rotation that makes it unusual.",
                 facts: ["Cloud-top temperature: about -224°C", "Moons: 27", "Feature: it rotates on its side"],
                 distanceAu: 19.2
             },
             Neptune: {
                 tagline: "Far edge navigation complete.",
-                description: "Neptune closes the route with a deep-blue destination and the longest jump in the sequence.",
+                description: "Neptune is a deep-blue ice giant with powerful winds and a distant orbit around the Sun.",
                 facts: ["Cloud-top temperature: about -214°C", "Moons: 14", "Feature: it has the strongest winds in the solar system"],
                 distanceAu: 30.05
             },
             Pluto: {
-                tagline: "Dwarf planet route plotted.",
-                description: "Pluto adds a distant edge-of-system destination and a colder, quieter finish to the cockpit tour.",
+                tagline: "",
+                description: "Pluto is a distant dwarf planet with an icy surface and a long, tilted orbit.",
                 facts: ["Surface temperature: about -229°C", "Moons: 5", "Orbit: a very long, tilted path around the Sun"],
                 distanceAu: 39.5
             }
@@ -1189,8 +1572,9 @@
             ageGrid.innerHTML = ageData
                 .map((planet) => {
                     const planetAge = formatPlanetAge(safeEarthAge, planet.period);
-                    const media = planet.name === "Mercury"
-                        ? `<video class="age-card-video" autoplay loop muted playsinline preload="auto" aria-hidden="true"><source src="../media/videos/Planets/mercury.mp4" type="video/mp4" /></video>`
+                    const hasVideo = Boolean(planetVideoSources[planet.name]);
+                    const media = hasVideo
+                        ? `<video class="age-card-video" autoplay loop muted playsinline preload="auto" aria-hidden="true"><source src="${planetVideoSources[planet.name]}" type="video/mp4" /></video>`
                         : `<div class="age-card-badge" data-planet="${planet.name}" aria-hidden="true"></div>`;
 
                     return `
@@ -1214,15 +1598,22 @@
             ageNote.textContent = "Enter your Earth age and press Calculate to see how it changes across the solar system.";
         };
 
-        const updateCockpit = (planetNameValue, sourceButton) => {
+        const updateCockpit = (planetNameValue, sourceButton, shouldAnnounce = false) => {
             const data = planetData[planetNameValue] || planetData.Earth;
             const videoSource = planetVideoSources[planetNameValue];
 
             planetOrb.dataset.planet = planetNameValue;
             const isVideoPlanet = Boolean(videoSource);
             planetDisplay.classList.toggle("mercury-mode", planetNameValue === "Mercury");
+            planetDisplay.classList.toggle("mars-mode", planetNameValue === "Mars");
+            planetDisplay.classList.toggle("jupiter-mode", planetNameValue === "Jupiter");
+            planetDisplay.classList.toggle("saturn-mode", planetNameValue === "Saturn");
+            planetDisplay.classList.toggle("uranus-mode", planetNameValue === "Uranus");
+            planetDisplay.classList.toggle("neptune-mode", planetNameValue === "Neptune");
+            planetDisplay.classList.toggle("pluto-mode", planetNameValue === "Pluto");
             planetDisplay.classList.toggle("sun-mode", planetNameValue === "Sun");
             planetDisplay.classList.toggle("venus-mode", planetNameValue === "Venus");
+            planetDisplay.classList.toggle("earth-mode", planetNameValue === "Earth");
             planetOrb.style.display = isVideoPlanet ? "none" : "block";
             planetVideo.style.display = isVideoPlanet ? "block" : "none";
 
@@ -1241,6 +1632,8 @@
                 planetVideo.currentTime = 0;
             }
             planetName.textContent = planetNameValue;
+            // Update the page title to reflect the selected planet (same behavior used for Mercury)
+            document.title = `${planetNameValue} — The Solar System`;
             planetTagline.textContent = data.tagline;
             planetDescription.textContent = sourceButton?.dataset.copy || data.description;
             planetFacts.innerHTML = (data.facts || []).map((fact) => `<li>${fact}</li>`).join("");
@@ -1251,6 +1644,13 @@
             planetButtons.forEach((button) => {
                 button.classList.toggle("active", button === sourceButton);
             });
+
+            if (shouldAnnounce && activePlanetSelection !== planetNameValue) {
+                activePlanetSelection = planetNameValue;
+                speakPlanetDescription(planetNameValue, data.description);
+            } else {
+                activePlanetSelection = planetNameValue;
+            }
         };
 
         planetButtons.forEach((button) => {
@@ -1271,7 +1671,7 @@
                 });
 
                 window.setTimeout(() => {
-                    updateCockpit(button.dataset.planet, button);
+                    updateCockpit(button.dataset.planet, button, true);
                     viewfinder.classList.remove("warping");
                     hyperspaceVideo.pause();
                     hyperspaceVideo.currentTime = 0;
@@ -1279,13 +1679,109 @@
             });
         });
 
-        updateCockpit("Earth", document.querySelector('.planet-button[data-planet="Earth"]'));
+        updateCockpit("Earth", document.querySelector('.planet-button[data-planet="Earth"]'), false);
         clearAgeCards();
 
         calculateAgeBtn.addEventListener("click", renderAgeCards);
         resetAgeBtn.addEventListener("click", () => {
             earthAgeInput.value = "18";
             clearAgeCards();
+        });
+
+        solarSystemToggle.addEventListener("click", () => {
+            updateSolarSystemIntro(activeSolarSystemVariant === "og" ? "real" : "og");
+        });
+
+        solarSystemFullscreen.addEventListener("click", async () => {
+            const fullscreenTarget = solarSystemVideo?.parentElement;
+
+            if (!fullscreenTarget) {
+                return;
+            }
+
+            if (document.fullscreenElement === fullscreenTarget) {
+                await document.exitFullscreen();
+                return;
+            }
+
+            if (fullscreenTarget.requestFullscreen) {
+                await fullscreenTarget.requestFullscreen();
+            }
+        });
+
+        document.addEventListener("fullscreenchange", updateFullscreenButton);
+
+        updateSolarSystemIntro("og");
+        updateFullscreenButton();
+
+        // Script Viewer Modal Functions
+        const openScriptModal = (scriptFileName, title = `${activePlanetSelection} Script`) => {
+            const scriptUrl = new URL(`../scripts/${scriptFileName}`, window.location.href);
+            scriptModalTitle.textContent = title;
+            scriptModal.removeAttribute("hidden");
+            scriptContent.src = scriptUrl.href;
+        };
+
+        const closeScriptModalModal = () => {
+            scriptModal.setAttribute("hidden", "");
+            scriptContent.removeAttribute("src");
+            scriptContent.removeAttribute("srcdoc");
+        };
+
+        const getScriptFileName = (planetName) => {
+            const mapping = {
+                Sun: "sun.txt",
+                Mercury: "mercury.txt",
+                Venus: "venus.txt",
+                Earth: "earth.txt",
+                Mars: "mars.txt",
+                Jupiter: "jupiter.txt",
+                Saturn: "saturn.txt",
+                Uranus: "uranus.txt",
+                Neptune: "neptune.txt",
+                Pluto: "pluto.txt"
+            };
+            return mapping[planetName] || "earth.txt";
+        };
+
+        const getSolarSystemScriptFileName = () => {
+            return activeSolarSystemVariant === "og" ? "solarog.txt" : "solarout.txt";
+        };
+
+        mainViewScriptBtn.addEventListener("click", () => {
+            const scriptTitle = activeSolarSystemVariant === "og"
+                ? "OG Solar System Script"
+                : "Realistic Solar System Script";
+            openScriptModal(getSolarSystemScriptFileName(), scriptTitle);
+        });
+
+        viewScriptBtn.addEventListener("click", () => {
+            if (activePlanetSelection === "Earth" && activeSolarSystemVariant) {
+                const scriptTitle = activeSolarSystemVariant === "og"
+                    ? "OG Solar System Script"
+                    : "Realistic Solar System Script";
+                openScriptModal(getSolarSystemScriptFileName(), scriptTitle);
+            } else {
+                const scriptFile = getScriptFileName(activePlanetSelection);
+                openScriptModal(scriptFile, `${activePlanetSelection} Script`);
+            }
+        });
+
+        closeScriptModal.addEventListener("click", closeScriptModalModal);
+        closeScriptModalBtn.addEventListener("click", closeScriptModalModal);
+
+        // Close modal when clicking the overlay
+        scriptModal.addEventListener("click", (e) => {
+            if (e.target === scriptModal.querySelector(".script-modal-overlay")) {
+                closeScriptModalModal();
+            }
+        });
+
+        // Close modal on escape key
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape" && !scriptModal.hasAttribute("hidden")) {
+                closeScriptModalModal();
+            }
         });
     </script>
 </body>
