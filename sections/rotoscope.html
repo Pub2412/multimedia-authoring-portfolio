@@ -1214,6 +1214,25 @@ Billie Jean is not- (hee)</div>
             }
         };
 
+        // Sync playback: prevent one video from playing if the other is paused
+        if (compareBannerVideo) {
+            compareBannerVideo.addEventListener("play", (e) => {
+                if (compareRotoscopeVideo && compareRotoscopeVideo.paused) {
+                    e.preventDefault();
+                    compareBannerVideo.pause();
+                }
+            });
+        }
+
+        if (compareRotoscopeVideo) {
+            compareRotoscopeVideo.addEventListener("play", (e) => {
+                if (compareBannerVideo && compareBannerVideo.paused) {
+                    e.preventDefault();
+                    compareRotoscopeVideo.pause();
+                }
+            });
+        }
+
         // Optional: allow clicking the comparison handle area to toggle playback of both
         const comparisonStageEl = document.getElementById("comparisonStage");
         if (comparisonStageEl) {
