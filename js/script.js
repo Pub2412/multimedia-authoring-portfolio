@@ -99,21 +99,6 @@ filters.forEach((btn) => {
     });
 });
 
-const processNotes = {
-    "Pulse City Intro Sequence": "Storyboards were drafted first, then clips were edited to beats using rhythm mapping.",
-    "Interactive Magazine Spread": "Built with semantic sections and scroll-triggered CSS classes for editorial pacing.",
-    "Forest Ambience Soundscape": "Layered ambient field recordings, then shaped tonal balance with EQ automation.",
-    "Culture Zine Layout System": "A 6-column modular grid ensured consistency across print and digital formats."
-};
-
-document.querySelectorAll(".mini-btn").forEach((button) => {
-    button.addEventListener("click", () => {
-        const key = button.dataset.project;
-        const note = processNotes[key] || "Process notes coming soon.";
-        window.alert(key + "\n\n" + note);
-    });
-});
-
 const galleryButtons = document.querySelectorAll("#galleryGrid button");
 const modal = document.getElementById("modal");
 const modalImage = document.getElementById("modalImage");
