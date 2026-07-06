@@ -1198,7 +1198,10 @@
                     </div>
                 </div>
                 <div class="placeholder-actions">
-                    <button class="ghost-button" id="mainViewScriptBtn" type="button">View Main Script</button>
+                    <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; align-items: flex-end;">
+                        <button class="ghost-button" id="mainViewScriptBtn" type="button">View Main Script</button>
+                        <button class="ghost-button" id="downloadMainViewScriptBtn" type="button">Download Blender Script</button>
+                    </div>
                     <button class="ghost-button" id="solarSystemToggle" type="button">Switch to Realistic Solar System</button>
                     <button class="ghost-button" id="solarSystemFullscreen" type="button">Open Fullscreen</button>
                 </div>
@@ -1389,6 +1392,7 @@
         const solarSystemToggle = document.getElementById("solarSystemToggle");
         const solarSystemFullscreen = document.getElementById("solarSystemFullscreen");
         const mainViewScriptBtn = document.getElementById("mainViewScriptBtn");
+        const downloadMainViewScriptBtn = document.getElementById("downloadMainViewScriptBtn");
         const viewScriptBtn = document.getElementById("viewScriptBtn");
         const downloadScriptBtn = document.getElementById("downloadScriptBtn");
         const downloadTextureBtn = document.getElementById("downloadTextureBtn");
@@ -1758,16 +1762,16 @@
         };
 
         const getActiveScriptInfo = () => {
-            if (activePlanetSelection === "Earth" && activeSolarSystemVariant) {
-                return {
-                    fileName: getSolarSystemScriptFileName(),
-                    title: activeSolarSystemVariant === "og" ? "OG Solar System Script" : "Realistic Solar System Script"
-                };
-            }
-
             return {
                 fileName: getScriptFileName(activePlanetSelection),
                 title: `${activePlanetSelection} Script`
+            };
+        };
+
+        const getMainViewScriptInfo = () => {
+            return {
+                fileName: getSolarSystemScriptFileName(),
+                title: activeSolarSystemVariant === "og" ? "OG Solar System Script" : "Realistic Solar System Script"
             };
         };
 
@@ -1780,6 +1784,20 @@
 
         const downloadActiveScript = () => {
             const { fileName } = getActiveScriptInfo();
+            const scriptUrl = new URL(`../scripts/${fileName}`, window.location.href);
+            const link = document.createElement("a");
+            link.href = scriptUrl.href;
+            link.download = fileName;
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            link.style.display = "none";
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        };
+
+        const downloadMainViewScript = () => {
+            const { fileName } = getMainViewScriptInfo();
             const scriptUrl = new URL(`../scripts/${fileName}`, window.location.href);
             const link = document.createElement("a");
             link.href = scriptUrl.href;
@@ -1811,8 +1829,12 @@
         };
 
         mainViewScriptBtn.addEventListener("click", () => {
-            const { fileName, title } = getActiveScriptInfo();
+            const { fileName, title } = getMainViewScriptInfo();
             openScriptModal(fileName, title);
+        });
+
+        downloadMainViewScriptBtn.addEventListener("click", () => {
+            downloadMainViewScript();
         });
 
         viewScriptBtn.addEventListener("click", () => {
