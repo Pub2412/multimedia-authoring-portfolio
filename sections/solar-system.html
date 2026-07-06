@@ -1237,13 +1237,19 @@
 
                 <aside class="controls">
                     <div class="description-panel">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                            <h3 style="margin: 0;">Description</h3>
-                            <button class="ghost-button" id="viewScriptBtn" type="button" style="font-size: 0.85rem; padding: 6px 10px; min-height: auto;">View Script</button>
+                        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                                <h3 style="margin: 0;">Description</h3>
+                            </div>
+                            <p id="planetDescription">
+                                Earth is currently centered in the viewfinder. Choose another planet to trigger the hyperspace effect and update this cockpit briefing.
+                            </p>
+                            <div style="display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px;">
+                                <button class="ghost-button" id="viewScriptBtn" type="button" style="font-size: 0.85rem; padding: 6px 10px; min-height: auto;">View Script</button>
+                                <button class="ghost-button" id="downloadScriptBtn" type="button" style="font-size: 0.85rem; padding: 6px 10px; min-height: auto;">Download Blender Script</button>
+                                <button class="ghost-button" id="downloadTextureBtn" type="button" style="font-size: 0.85rem; padding: 6px 10px; min-height: auto;">Download Texture</button>
+                            </div>
                         </div>
-                        <p id="planetDescription">
-                            Earth is currently centered in the viewfinder. Choose another planet to trigger the hyperspace effect and update this cockpit briefing.
-                        </p>
                         <ul class="planet-facts" id="planetFacts"></ul>
                         <div class="fuel-row" aria-label="Distance from the Sun">
                             <span>Distance from Sun</span>
@@ -1384,6 +1390,8 @@
         const solarSystemFullscreen = document.getElementById("solarSystemFullscreen");
         const mainViewScriptBtn = document.getElementById("mainViewScriptBtn");
         const viewScriptBtn = document.getElementById("viewScriptBtn");
+        const downloadScriptBtn = document.getElementById("downloadScriptBtn");
+        const downloadTextureBtn = document.getElementById("downloadTextureBtn");
         const scriptModal = document.getElementById("scriptModal");
         const scriptModalTitle = document.getElementById("scriptModalTitle");
         const scriptContent = document.getElementById("scriptContent");
@@ -1716,19 +1724,6 @@
         updateFullscreenButton();
 
         // Script Viewer Modal Functions
-        const openScriptModal = (scriptFileName, title = `${activePlanetSelection} Script`) => {
-            const scriptUrl = new URL(`../scripts/${scriptFileName}`, window.location.href);
-            scriptModalTitle.textContent = title;
-            scriptModal.removeAttribute("hidden");
-            scriptContent.src = scriptUrl.href;
-        };
-
-        const closeScriptModalModal = () => {
-            scriptModal.setAttribute("hidden", "");
-            scriptContent.removeAttribute("src");
-            scriptContent.removeAttribute("srcdoc");
-        };
-
         const getScriptFileName = (planetName) => {
             const mapping = {
                 Sun: "sun.txt",
@@ -1749,23 +1744,88 @@
             return activeSolarSystemVariant === "og" ? "solarog.txt" : "solarout.txt";
         };
 
+        const textureImageUrls = {
+            Sun: "https://upload.wikimedia.org/wikipedia/commons/8/80/Sun_in_white_light.jpg",
+            Mercury: "https://upload.wikimedia.org/wikipedia/commons/4/4a/Mercury_in_color_-_Prockter07_centered.jpg",
+            Venus: "https://upload.wikimedia.org/wikipedia/commons/8/85/Venus_globe.jpg",
+            Earth: "https://upload.wikimedia.org/wikipedia/commons/9/97/The_Earth_seen_from_Apollo_17.jpg",
+            Mars: "https://upload.wikimedia.org/wikipedia/commons/0/02/OSIRIS_Mars_true_color.jpg",
+            Jupiter: "https://upload.wikimedia.org/wikipedia/commons/2/2b/Jupiter_and_its_shrunken_Great_Red_Spot.jpg",
+            Saturn: "https://upload.wikimedia.org/wikipedia/commons/c/c7/Saturn_during_Equinox.jpg",
+            Uranus: "https://upload.wikimedia.org/wikipedia/commons/3/3d/Uranus2.jpg",
+            Neptune: "https://upload.wikimedia.org/wikipedia/commons/5/56/Neptune_Full.jpg",
+            Pluto: "https://upload.wikimedia.org/wikipedia/commons/2/2a/Pluto-01.jpg"
+        };
+
+        const getActiveScriptInfo = () => {
+            if (activePlanetSelection === "Earth" && activeSolarSystemVariant) {
+                return {
+                    fileName: getSolarSystemScriptFileName(),
+                    title: activeSolarSystemVariant === "og" ? "OG Solar System Script" : "Realistic Solar System Script"
+                };
+            }
+
+            return {
+                fileName: getScriptFileName(activePlanetSelection),
+                title: `${activePlanetSelection} Script`
+            };
+        };
+
+        const openScriptModal = (scriptFileName, title = `${activePlanetSelection} Script`) => {
+            const scriptUrl = new URL(`../scripts/${scriptFileName}`, window.location.href);
+            scriptModalTitle.textContent = title;
+            scriptModal.removeAttribute("hidden");
+            scriptContent.src = scriptUrl.href;
+        };
+
+        const downloadActiveScript = () => {
+            const { fileName } = getActiveScriptInfo();
+            const scriptUrl = new URL(`../scripts/${fileName}`, window.location.href);
+            const link = document.createElement("a");
+            link.href = scriptUrl.href;
+            link.download = fileName;
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            link.style.display = "none";
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        };
+
+        const downloadActiveTexture = () => {
+            const textureUrl = textureImageUrls[activePlanetSelection] || textureImageUrls.Earth;
+            const link = document.createElement("a");
+            link.href = textureUrl;
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            link.download = `${activePlanetSelection.toLowerCase()}-texture.jpg`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        };
+
+        const closeScriptModalModal = () => {
+            scriptModal.setAttribute("hidden", "");
+            scriptContent.removeAttribute("src");
+            scriptContent.removeAttribute("srcdoc");
+        };
+
         mainViewScriptBtn.addEventListener("click", () => {
-            const scriptTitle = activeSolarSystemVariant === "og"
-                ? "OG Solar System Script"
-                : "Realistic Solar System Script";
-            openScriptModal(getSolarSystemScriptFileName(), scriptTitle);
+            const { fileName, title } = getActiveScriptInfo();
+            openScriptModal(fileName, title);
         });
 
         viewScriptBtn.addEventListener("click", () => {
-            if (activePlanetSelection === "Earth" && activeSolarSystemVariant) {
-                const scriptTitle = activeSolarSystemVariant === "og"
-                    ? "OG Solar System Script"
-                    : "Realistic Solar System Script";
-                openScriptModal(getSolarSystemScriptFileName(), scriptTitle);
-            } else {
-                const scriptFile = getScriptFileName(activePlanetSelection);
-                openScriptModal(scriptFile, `${activePlanetSelection} Script`);
-            }
+            const { fileName, title } = getActiveScriptInfo();
+            openScriptModal(fileName, title);
+        });
+
+        downloadScriptBtn.addEventListener("click", () => {
+            downloadActiveScript();
+        });
+
+        downloadTextureBtn.addEventListener("click", () => {
+            downloadActiveTexture();
         });
 
         closeScriptModal.addEventListener("click", closeScriptModalModal);
